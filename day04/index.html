@@ -36,7 +36,7 @@ h1,h2,h3,p{margin:0}
 .mini-title{margin-top:24px;font-size:15px;font-weight:800;color:var(--muted)}
 
 .progress{margin-top:28px}
-.progress ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.progress ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .progress button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:2px;width:100%;padding-block:4px}
 .progress button:disabled{cursor:default}
 .pbar{height:4px;border-radius:2px;background:var(--line);margin-bottom:6px}
@@ -104,6 +104,23 @@ textarea.input{resize:none;min-height:92px;line-height:1.55}
 .linkbtn{all:unset;cursor:pointer;color:var(--muted);text-decoration:underline;font-size:14px;font-weight:600}
 footer{border-top:1px solid var(--line);margin-top:24px}
 footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint)}
+.counters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ctr{background:var(--card2);border-radius:16px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:2px}
+.ctr i{font-style:normal;font-size:11px;font-weight:800;color:var(--faint);letter-spacing:.06em}
+.ctr b{font-size:19px;font-weight:800;letter-spacing:-0.04em}
+.ctr small{font-size:12px;color:var(--muted);line-height:1.4;min-height:2.8em}
+.ctr .row{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.ctr .row button{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;background:#2a2a2a;color:var(--fg)}
+.ctr .row button.plus{background:var(--accent);color:var(--ink)}
+.ctr .row button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.ctr .row output{flex:1;text-align:center;font-size:30px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums}
+.tally{margin-top:16px}
+.tally .tl{display:flex;justify-content:space-between;font-size:14px;font-weight:800}
+.tally .tl span{color:var(--muted);font-weight:700}
+.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--card2);margin-top:8px}
+.stack i{display:block;height:100%;transition:width .2s}
+.howto{margin-top:12px;background:var(--card);border-radius:16px;padding:14px 16px;font-size:14px;color:var(--muted);line-height:1.6}
+.howto b{color:var(--fg)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 </head>
@@ -114,7 +131,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint)}
 
 <script>
 (function(){
-const KEY='mfl-day04-diary-v1', TTL=3*24*3600*1000;
+const KEY='mfl-day04-diary-v2', TTL=3*24*3600*1000;
 const FEELINGS=['지침·피곤','스트레스','심심함','불안·조급','외로움','신남·설렘','뿌듯함','비교·부러움'];
 const REASONS=['꼭 필요해서','할인·한정이라서','남들 다 있어서','나한테 주는 보상','그냥 습관처럼','나를 키우려고'];
 const TIMES=['아침','점심','오후','저녁','밤','새벽'];
@@ -127,31 +144,43 @@ const STATUS=['잘 쓰고 있다','아직 방치 중','이미 다 썼다'];
 const WORTH=[{k:'yes',s:'○',n:'있었다'},{k:'meh',s:'△',n:'애매하다'},{k:'no',s:'✕',n:'아깝다'}];
 const TRIG={'지침·피곤':'지치고 피곤할','스트레스':'스트레스 받을','심심함':'심심할','불안·조급':'불안하고 조급할','외로움':'외로울','신남·설렘':'기분이 들뜰','뿌듯함':'뭔가 해냈을','비교·부러움':'남과 비교될'};
 const RTRIG={'할인·한정이라서':'할인·한정 알림을 볼','남들 다 있어서':'남들이 다 가진 걸 볼','나한테 주는 보상':'나한테 보상해주고 싶을','그냥 습관처럼':'아무 생각 없이 폰을 볼'};
-const STEPS=['무엇을','그때 나는','돈값','깨달음'];
-const blank=()=>({v:1,saved:Date.now(),step:0,date:today(),time:'',item:'',amount:'',hideAmount:true,where:'',feel:[],reason:[],why:'',type:'',status:'',worth:'',worthWhy:'',trigger:'',next:''});
+const STEPS=['7일 분류','무엇을','그때 나는','돈값','깨달음'];
+const TCOL={need:'#F5F5F5',grow:'#14FA32',feel:'#9A9A94',auto:'#4E4E4A'};
+const blank=()=>({v:2,saved:Date.now(),step:0,cnt:{need:0,grow:0,feel:0,auto:0},note:'',date:today(),time:'',item:'',amount:'',hideAmount:true,where:'',feel:[],reason:[],why:'',type:'',status:'',worth:'',worthWhy:'',trigger:'',next:''});
 function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 let S=load();
-function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===1&&Date.now()-r.saved<TTL)return Object.assign(blank(),r)}catch(e){}return blank()}
+function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===2&&Date.now()-r.saved<TTL)return Object.assign(blank(),r)}catch(e){}return blank()}
 function save(){S.saved=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function reset(){try{localStorage.removeItem(KEY)}catch(e){}S=blank();render();window.scrollTo(0,0)}
 const app=document.getElementById('app');
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function fmtWon(v){const n=Number(String(v).replace(/[^0-9]/g,''));return n?n.toLocaleString('ko-KR'):''}
 function dateLabel(d){if(!d)return '';const t=new Date(d+'T00:00:00');if(isNaN(t))return d;return (t.getMonth()+1)+'월 '+t.getDate()+'일 '+'일월화수목금토'[t.getDay()]+'요일'}
-function valid(i){if(i===0)return S.item.trim().length>0;if(i===1)return S.feel.length+S.reason.length>0;if(i===2)return !!S.type&&!!S.worth;if(i===3)return S.trigger.trim().length>0;return true}
+const total=()=>Object.values(S.cnt).reduce((a,b)=>a+b,0);
+function valid(i){if(i===0)return total()>=3;if(i===1)return S.item.trim().length>0;if(i===2)return S.feel.length+S.reason.length>0;if(i===3)return !!S.type&&!!S.worth;if(i===4)return S.trigger.trim().length>0;return true}
 
 function hero(){return `<section class="hero">
 <h1 class="hero-title">MONEY<br>HAS FEELINGS.</h1>
 <p class="hero-mission">DAY 04. 소비는 감정이다</p>
-<p class="hero-copy">최근 소비 하나로,<br>내 지갑이 열리는 순간을 찾아봐요.</p>
+<p class="hero-copy">일주일 소비를 넓게 보고, 한 건은 깊게.<br>내 지갑이 열리는 순간을 찾아봐요.</p>
 <p class="hero-sub">잘했다, 못했다 평가는 잠시 내려놓고 그때의 기분을 솔직하게 적어보세요.</p>
-<ul class="meta"><li>4단계 · 10분</li><li>금액은 안 적어도 OK</li><li>마지막에 인증 이미지 저장</li><li>입력 내용은 내 기기에만 저장</li></ul>
+<ul class="meta"><li>5단계 · 10~15분</li><li>카드·페이 앱 준비</li><li>금액은 안 적어도 OK</li><li>마지막에 인증 이미지 저장</li><li>입력 내용은 내 기기에만 저장</li></ul>
 </section>`}
-function progress(){return `<nav class="progress" aria-label="진행 단계"><ol>${STEPS.map((t,i)=>{const cls=i<S.step?'done':i===S.step?'current':'';const can=i<S.step||S.step===4;return `<li class="${cls}"><button type="button" data-go="${i}" ${can?'':'disabled'} ${i===S.step?'aria-current="step"':''}><span class="pbar"></span><span class="pk">STEP 0${i+1}</span><span class="pt">${t}</span></button></li>`}).join('')}</ol></nav>`}
+function progress(){return `<nav class="progress" aria-label="진행 단계"><ol>${STEPS.map((t,i)=>{const cls=i<S.step?'done':i===S.step?'current':'';const can=i<S.step||S.step===5;return `<li class="${cls}"><button type="button" data-go="${i}" ${can?'':'disabled'} ${i===S.step?'aria-current="step"':''}><span class="pbar"></span><span class="pk">STEP 0${i+1}</span><span class="pt">${t}</span></button></li>`}).join('')}</ol></nav>`}
 const chip=(group,val,on)=>`<button type="button" class="chip" data-chip="${group}" data-val="${esc(val)}" aria-pressed="${on}">${esc(val)}</button>`;
 
-function step0(){return `<section class="step"><p class="eyebrow">STEP 01 · 무엇을</p><h2>최근에 뭘 샀나요?</h2>
-<p class="lead">최근 3일 안에 쓴 돈 중에서 기억에 남는 소비 하나를 골라요. 커피 한 잔도 좋아요.</p>
+function weekLine(){const t=total();if(!t)return '';return `<p class="howto">최근 7일 <b>${t}건</b> 중 감정 소비 <b>${S.cnt.feel}건</b>, 습관 소비 <b>${S.cnt.auto}건</b>이었어요. 비슷한 상황이 반복되진 않았나요?</p>`}
+function tallyHTML(){const t=total();return `<div class="tl">총 ${t}건 <span>${t?TYPES.map(x=>x.n+' '+Math.round(S.cnt[x.k]/t*100)+'%').join(' · '):'+ 버튼을 눌러 세어보세요'}</span></div><div class="stack" aria-hidden="true">${t?TYPES.map(x=>`<i style="width:${S.cnt[x.k]/t*100}%;background:${TCOL[x.k]}"></i>`).join(''):''}</div>`}
+function stepW(){return `<section class="step"><p class="eyebrow">STEP 01 · 7일 분류</p><h2>최근 7일, 내 소비는 어떤 모양일까?</h2>
+<p class="lead">카드·페이 앱에서 최근 7일 결제 내역을 열어주세요. 한 건씩 보면서 네 가지 중 어디에 들어가는지 + 를 눌러요.</p>
+<p class="howto"><b>이렇게 해요</b><br>① 카드 앱·간편결제 앱의 이용 내역 열기<br>② 위에서부터 한 건씩, 해당 칸에 + 누르기<br>③ 헷갈리면 가장 가까운 칸에. 금액은 세지 않아도 돼요</p>
+<div class="card">
+<div class="counters">${TYPES.map(t=>`<div class="ctr"><i>${t.e}</i><b>${t.n} 소비</b><small>${t.d}</small><div class="row"><button type="button" data-cnt="${t.k}" data-d="-1" aria-label="${t.n} 소비 하나 빼기">−</button><output id="c-${t.k}" aria-live="polite">${S.cnt[t.k]}</output><button type="button" class="plus" data-cnt="${t.k}" data-d="1" aria-label="${t.n} 소비 하나 더하기">+</button></div></div>`).join('')}</div>
+<div class="tally" id="tally">${tallyHTML()}</div>
+<div class="field" style="margin-top:20px"><label class="label" for="f-note">내역을 보며 눈에 띈 점 <small>선택</small></label><input id="f-note" class="input" data-f="note" maxlength="40" value="${esc(S.note)}" placeholder="예: 배달이 일주일에 4번이나 있었어요"><div class="count">${S.note.length}/40</div></div>
+</div></section>`}
+function step0(){return `<section class="step"><p class="eyebrow">STEP 02 · 무엇을</p><h2>그중 한 건만 깊게 볼까요?</h2>
+<p class="lead">방금 본 7일 내역 중에서 가장 마음에 걸리는 소비 하나를 골라요. 감정·습관 칸에 넣은 것 중에서 고르면 좋아요.</p>
 <div class="card">
 <div class="field"><label class="label" for="f-item">산 것</label><input id="f-item" class="input" data-f="item" maxlength="30" value="${esc(S.item)}" placeholder="예: 배달 떡볶이"><div class="count">${S.item.length}/30</div></div>
 <div class="field"><label class="label" for="f-date">언제 <small>날짜와 시간대</small></label><input id="f-date" class="input" type="date" data-f="date" value="${esc(S.date)}">
@@ -160,7 +189,7 @@ function step0(){return `<section class="step"><p class="eyebrow">STEP 01 · 무
 <label class="toggle"><input type="checkbox" data-f="hideAmount" ${S.hideAmount?'checked':''}>인증 이미지에는 금액 숨기기</label></div>
 <div class="field"><label class="label" for="f-where">어디서, 누구랑? <small>선택</small></label><input id="f-where" class="input" data-f="where" maxlength="30" value="${esc(S.where)}" placeholder="예: 집에서 혼자, 퇴근하고"></div>
 </div></section>`}
-function step1(){return `<section class="step"><p class="eyebrow">STEP 02 · 그때 나는</p><h2>그 순간, 어떤 기분이었나요?</h2>
+function step1(){return `<section class="step"><p class="eyebrow">STEP 03 · 그때 나는</p><h2>그 순간, 어떤 기분이었나요?</h2>
 <p class="lead">해당하는 걸 모두 골라요. 기분과 이유 중 하나만 골라도 다음으로 갈 수 있어요.</p>
 <div class="card">
 <div class="field"><p class="label">그때 내 기분은</p><div class="chips" role="group" aria-label="기분">${FEELINGS.map(t=>chip('feel',t,S.feel.includes(t))).join('')}</div></div>
@@ -169,7 +198,7 @@ function step1(){return `<section class="step"><p class="eyebrow">STEP 02 · 그
 </div></section>`}
 function step2(){const emo=S.feel.some(f=>['지침·피곤','스트레스','심심함','불안·조급','외로움','비교·부러움'].includes(f))||S.reason.includes('나한테 주는 보상');
 const hint=S.type&&S.type!=='feel'&&emo?`<p class="hint" role="note">앞에서 고른 기분을 보면, 혹시 감정 소비였을 수도 있어요. 정답은 없으니 한 번만 더 생각해보고 골라요.</p>`:'';
-return `<section class="step"><p class="eyebrow">STEP 03 · 돈값</p><h2>이 소비, 돈값 했나요?</h2>
+return `<section class="step"><p class="eyebrow">STEP 04 · 돈값</p><h2>이 소비, 돈값 했나요?</h2>
 <p class="lead">비싸도 돈값 하면 잘 쓴 소비, 싸도 방치되면 아까운 소비예요. 기준은 금액이 아니라 돈값이에요.</p>
 <div class="card">
 <div class="field"><p class="label">어떤 유형인가요 <small>하나만</small></p><div class="types" role="group" aria-label="소비 유형">${TYPES.map(t=>`<button type="button" class="type" data-type="${t.k}" aria-pressed="${S.type===t.k}"><i>${t.e}</i><b>${t.n}</b><span>${t.d}</span></button>`).join('')}</div>${hint}</div>
@@ -178,8 +207,9 @@ return `<section class="step"><p class="eyebrow">STEP 03 · 돈값</p><h2>이 �
 <div class="field"><label class="label" for="f-ww">그렇게 느낀 이유 <small>선택</small></label><input id="f-ww" class="input" data-f="worthWhy" maxlength="50" value="${esc(S.worthWhy)}" placeholder="예: 먹을 땐 좋았는데 다음 날 후회했어요"><div class="count">${S.worthWhy.length}/50</div></div>
 </div></section>`}
 function suggestions(){const out=[];S.feel.forEach(f=>TRIG[f]&&out.push(TRIG[f]));S.reason.forEach(r=>RTRIG[r]&&out.push(RTRIG[r]));return [...new Set(out)].slice(0,4)}
-function step3(){const sg=suggestions();return `<section class="step"><p class="eyebrow">STEP 04 · 깨달음</p><h2>나는 언제 지갑이 열릴까?</h2>
-<p class="lead">오늘 소비에서 찾은 나만의 '지갑 트리거'를 한 문장으로 적어요.</p>
+function step3(){const sg=suggestions();return `<section class="step"><p class="eyebrow">STEP 05 · 깨달음</p><h2>나는 언제 지갑이 열릴까?</h2>
+<p class="lead">7일 분류 결과와 오늘 쓴 일기를 같이 보고, 나만의 '지갑 트리거'를 한 문장으로 적어요.</p>
+${weekLine()}
 <div class="card">
 <div class="field"><p class="label">나의 지갑 트리거</p>
 <div class="sentence"><span>나는</span><input data-f="trigger" maxlength="24" value="${esc(S.trigger)}" placeholder="야근하고 지쳐서 집에 왔을" aria-label="지갑이 열리는 순간"><span>때 지갑이 열린다</span></div>
@@ -194,18 +224,18 @@ function result(){return `<section class="step"><p class="eyebrow">RESULT</p><h2
 <button type="button" class="btn primary" id="dl">인증 이미지 저장 ↓</button>
 <a class="btn outline" href="spending-diary.pdf" download="MONEY_FREE_LAB_소비일기_양식.pdf">소비일기 PDF 양식 받기 (인쇄·아이패드용)</a>
 </div>
-<p class="note">${S.amount&&!S.hideAmount?'<b>인증 이미지에 금액이 들어가요.</b> 숨기려면 STEP 01에서 체크해 주세요. ':''}이 결과는 교육 목적의 기록이며, 입력 내용은 이 기기에만 저장돼요.</p>
-<div class="nav"><button type="button" class="btn ghost" data-go="3">← STEP 04로</button><button type="button" class="linkbtn" id="reset">처음부터 다시 하기 (입력 기록 삭제)</button></div>
+<p class="note">${S.amount&&!S.hideAmount?'<b>인증 이미지에 금액이 들어가요.</b> 숨기려면 STEP 02에서 체크해 주세요. ':''}이 결과는 교육 목적의 기록이며, 입력 내용은 이 기기에만 저장돼요.</p>
+<div class="nav"><button type="button" class="btn ghost" data-go="4">← STEP 05로</button><button type="button" class="linkbtn" id="reset">처음부터 다시 하기 (입력 기록 삭제)</button></div>
 </section>`}
 
 function render(){
- const views=[step0,step1,step2,step3,result];
+ const views=[stepW,step0,step1,step2,step3,result];
  let html=(S.step===0?hero():'')+progress()+views[S.step]();
- if(S.step<4){html+=`<p class="err" id="err" aria-live="polite"></p><div class="nav">${S.step>0?'<button type="button" class="btn ghost" data-go="'+(S.step-1)+'">이전</button>':''}<button type="button" class="btn primary" id="next">${S.step===3?'결과 보기':'다음'}</button></div>`}
+ if(S.step<5){html+=`<p class="err" id="err" aria-live="polite"></p><div class="nav">${S.step>0?'<button type="button" class="btn ghost" data-go="'+(S.step-1)+'">이전</button>':''}<button type="button" class="btn primary" id="next">${S.step===4?'결과 보기':'다음'}</button></div>`}
  app.innerHTML=html;
- if(S.step===4)draw();
+ if(S.step===5)draw();
 }
-function msg(i){return ['산 것을 적어주세요.','기분이나 이유를 하나 이상 골라주세요.','유형과 돈값을 골라주세요.','지갑 트리거 문장을 채워주세요.'][i]}
+function msg(i){return ['최소 3건 이상 분류해 주세요. 내역이 적다면 최근 2주로 늘려도 돼요.','산 것을 적어주세요.','기분이나 이유를 하나 이상 골라주세요.','유형과 돈값을 골라주세요.','지갑 트리거 문장을 채워주세요.'][i]}
 app.addEventListener('input',e=>{const f=e.target.dataset.f;if(!f)return;const er=document.getElementById('err');if(er)er.textContent='';
  if(f==='hideAmount'){S.hideAmount=e.target.checked}
  else if(f==='amount'){const raw=e.target.value.replace(/[^0-9]/g,'').slice(0,9);S.amount=raw;const pos=e.target.value.length;e.target.value=fmtWon(raw)}
@@ -220,6 +250,7 @@ app.addEventListener('click',e=>{
   if(g==='feel'||g==='reason'){const a=S[g];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v)}
   else{S[g]=S[g]===v?'':v}
   const er=document.getElementById('err');if(er)er.textContent='';save();if(g==='time'||g==='status'){b.parentElement.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',String(S[g]===c.dataset.val)))}else b.setAttribute('aria-pressed',String(S[g].includes(v)));return}
+ if(b.dataset.cnt){const k=b.dataset.cnt;S.cnt[k]=Math.max(0,Math.min(99,S.cnt[k]+Number(b.dataset.d)));save();document.getElementById('c-'+k).textContent=S.cnt[k];document.getElementById('tally').innerHTML=tallyHTML();const er=document.getElementById('err');if(er)er.textContent='';return}
  if(b.dataset.type){S.type=S.type===b.dataset.type?'':b.dataset.type;save();const y=window.scrollY;render();window.scrollTo(0,y);return}
  if(b.dataset.worth){S.worth=b.dataset.worth;save();b.parentElement.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.worth===S.worth)));return}
  if(b.dataset.sugg){S.trigger=b.dataset.sugg;save();const inp=app.querySelector('[data-f="trigger"]');inp.value=S.trigger;inp.focus();return}
@@ -244,13 +275,21 @@ async function draw(){
  c.fillStyle='#14FA32';c.fillText('DIARY',P,302);if('letterSpacing' in c)c.letterSpacing='-1px';
  c.fillStyle='#A3A3A3';c.font=F(600,26);c.fillText('DAY 04. 소비는 감정이다',P,352);
  let y=400;
+ // 7일 분류
+ {const t=total();const hW=W-P*2;const bh=t?250:0;
+  if(t){c.fillStyle='#141414';rr(c,P,y,hW,bh,28);c.fill();
+  c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('01  최근 7일 분류',P+40,y+56);
+  c.fillStyle='#A3A3A3';c.font=F(600,24);c.textAlign='right';c.fillText('총 '+t+'건',W-P-40,y+56);c.textAlign='left';
+  const bx=P+40,bw=hW-80,by=y+84;c.save();rr(c,bx,by,bw,30,10);c.clip();let x=bx;TYPES.forEach(tp=>{const w=bw*S.cnt[tp.k]/t;c.fillStyle=TCOL[tp.k];c.fillRect(x,by,w,30);x+=w});c.restore();
+  const cw=bw/4;TYPES.forEach((tp,i)=>{const cx=bx+i*cw;c.fillStyle=TCOL[tp.k];rr(c,cx,by+66,18,18,5);c.fill();c.fillStyle='#F5F5F5';c.font=F(800,28);c.fillText(tp.n,cx+28,by+84);c.fillStyle='#A3A3A3';c.font=F(700,28);c.fillText(S.cnt[tp.k]+'건',cx+28,by+124)});
+  y+=bh+20}}
  // 무엇을
  const box=(h)=>{c.fillStyle='#141414';rr(c,P,y,W-P*2,h,28);c.fill()};
  const when=[dateLabel(S.date),S.time].filter(Boolean).join(' ');
  const amt=S.amount&&!S.hideAmount?fmtWon(S.amount)+'원':'';
  c.font=F(800,44);const itemLines=wrap(c,S.item||'-',W-P*2-80).slice(0,2);
  const h1=56+28+itemLines.length*56+(amt||S.where?44:0)+30;box(h1);
- c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('01  무엇을',P+40,y+56);
+ c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('02  무엇을',P+40,y+56);
  c.fillStyle='#A3A3A3';c.font=F(600,22);c.textAlign='right';c.fillText(when,W-P-40,y+56);c.textAlign='left';
  c.fillStyle='#F5F5F5';c.font=F(800,44);itemLines.forEach((l,i)=>c.fillText(l,P+40,y+56+28+44+i*56));
  if(amt||S.where){c.fillStyle='#A3A3A3';c.font=F(600,26);c.fillText([amt,S.where].filter(Boolean).join(' · '),P+40,y+56+28+44+itemLines.length*56)}
@@ -259,7 +298,7 @@ async function draw(){
  const tags=[...S.feel,...S.reason];c.font=F(700,26);
  let rows=[[]],rw=0;const maxW=W-P*2-80;tags.forEach(t=>{const w=c.measureText(t).width+44;if(rw+w>maxW&&rows[rows.length-1].length){rows.push([]);rw=0}rows[rows.length-1].push([t,w]);rw+=w+12});
  rows=rows.slice(0,3);const h2=56+20+rows.length*60+(S.why?52:0)+26;box(h2);
- c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('02  그때 나는',P+40,y+56);
+ c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('03  그때 나는',P+40,y+56);
  let ty=y+56+20;rows.forEach(r=>{let tx=P+40;r.forEach(([t,w])=>{const isFeel=S.feel.includes(t);c.fillStyle=isFeel?'#1E1E1E':'transparent';rr(c,tx,ty,w,46,23);if(isFeel)c.fill();c.strokeStyle=isFeel?'#1E1E1E':'#3a3a3a';c.lineWidth=2;c.stroke();c.fillStyle='#F5F5F5';c.font=F(700,26);c.fillText(t,tx+22,ty+32);tx+=w+12});ty+=60});
  if(S.why){c.fillStyle='#A3A3A3';c.font=F(600,26);const l=wrap(c,'“'+S.why+'”',maxW)[0];c.fillText(l,P+40,ty+30)}
  y+=h2+20;
@@ -267,7 +306,7 @@ async function draw(){
  const half=(W-P*2-20)/2;const h3=170;
  const t=TYPES.find(x=>x.k===S.type)||{n:'-',e:''};const isFeel=false;
  c.fillStyle=isFeel?'#14FA32':'#141414';rr(c,P,y,half,h3,28);c.fill();
- c.fillStyle=isFeel?'#03210A':'#14FA32';c.font=F(800,22);c.fillText('03  유형',P+40,y+56);
+ c.fillStyle=isFeel?'#03210A':'#14FA32';c.font=F(800,22);c.fillText('04  유형',P+40,y+56);
  c.fillStyle=isFeel?'#03210A':'#F5F5F5';c.font=F(800,60);c.fillText(t.n+' 소비',P+40,y+132);
  const w=WORTH.find(x=>x.k===S.worth)||{s:'',n:'-'};
  c.fillStyle='#141414';rr(c,P+half+20,y,half,h3,28);c.fill();
@@ -279,7 +318,7 @@ async function draw(){
  c.font=F(600,26);const nx=S.next?wrap(c,'다음엔 → '+S.next,W-P*2-80).slice(0,2):[];
  const h4=56+24+trig.length*60+(nx.length?nx.length*38+22:0)+34;
  c.fillStyle='#F5F5F5';rr(c,P,y,W-P*2,h4,28);c.fill();
- c.fillStyle='#03210A';c.fillStyle='#0B0B0B';c.font=F(800,22);c.fillText('04  나의 지갑 트리거',P+40,y+56);
+ c.fillStyle='#03210A';c.fillStyle='#0B0B0B';c.font=F(800,22);c.fillText('05  나의 지갑 트리거',P+40,y+56);
  c.font=F(800,46);trig.forEach((l,i)=>{const yy=y+56+24+46+i*60;c.fillStyle='#14FA32';const lw=c.measureText(l).width;c.fillRect(P+36,yy-6,lw+8,16);c.fillStyle='#0B0B0B';c.fillText(l,P+40,yy)});
  c.fillStyle='#4A4A47';c.font=F(600,26);nx.forEach((l,i)=>c.fillText(l,P+40,y+56+24+trig.length*60+30+i*38));
  y+=h4;
