@@ -117,8 +117,14 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint)}
 .tally{margin-top:16px}
 .tally .tl{display:flex;justify-content:space-between;font-size:14px;font-weight:800}
 .tally .tl span{color:var(--muted);font-weight:700}
-.stack{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--card2);margin-top:8px}
-.stack i{display:block;height:100%;transition:width .2s}
+.bars{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.bar{display:grid;grid-template-columns:40px 1fr 88px;align-items:center;gap:10px}
+.bar b{font-size:14px;font-weight:800}
+.bar .trk{height:14px;border-radius:7px;background:var(--card2);overflow:hidden}
+.bar .trk i{display:block;height:100%;border-radius:7px;background:#C9C9C3;transition:width .2s}
+.bar.top .trk i{background:var(--accent)}
+.bar em{font-style:normal;font-size:13px;font-weight:700;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
+.bar.top em{color:var(--fg)}
 .howto{margin-top:12px;background:var(--card);border-radius:16px;padding:14px 16px;font-size:14px;color:var(--muted);line-height:1.6}
 .howto b{color:var(--fg)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -145,7 +151,6 @@ const WORTH=[{k:'yes',s:'○',n:'있었다'},{k:'meh',s:'△',n:'애매하다'},
 const TRIG={'지침·피곤':'지치고 피곤할','스트레스':'스트레스 받을','심심함':'심심할','불안·조급':'불안하고 조급할','외로움':'외로울','신남·설렘':'기분이 들뜰','뿌듯함':'뭔가 해냈을','비교·부러움':'남과 비교될'};
 const RTRIG={'할인·한정이라서':'할인·한정 알림을 볼','남들 다 있어서':'남들이 다 가진 걸 볼','나한테 주는 보상':'나한테 보상해주고 싶을','그냥 습관처럼':'아무 생각 없이 폰을 볼'};
 const STEPS=['7일 분류','무엇을','그때 나는','돈값','깨달음'];
-const TCOL={need:'#F5F5F5',grow:'#14FA32',feel:'#9A9A94',auto:'#4E4E4A'};
 const blank=()=>({v:2,saved:Date.now(),step:0,cnt:{need:0,grow:0,feel:0,auto:0},note:'',date:today(),time:'',item:'',amount:'',hideAmount:true,where:'',feel:[],reason:[],why:'',type:'',status:'',worth:'',worthWhy:'',trigger:'',next:''});
 function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 let S=load();
@@ -170,7 +175,8 @@ function progress(){return `<nav class="progress" aria-label="진행 단계"><ol
 const chip=(group,val,on)=>`<button type="button" class="chip" data-chip="${group}" data-val="${esc(val)}" aria-pressed="${on}">${esc(val)}</button>`;
 
 function weekLine(){const t=total();if(!t)return '';return `<p class="howto">최근 7일 <b>${t}건</b> 중 감정 소비 <b>${S.cnt.feel}건</b>, 습관 소비 <b>${S.cnt.auto}건</b>이었어요. 비슷한 상황이 반복되진 않았나요?</p>`}
-function tallyHTML(){const t=total();return `<div class="tl">총 ${t}건 <span>${t?TYPES.map(x=>x.n+' '+Math.round(S.cnt[x.k]/t*100)+'%').join(' · '):'+ 버튼을 눌러 세어보세요'}</span></div><div class="stack" aria-hidden="true">${t?TYPES.map(x=>`<i style="width:${S.cnt[x.k]/t*100}%;background:${TCOL[x.k]}"></i>`).join(''):''}</div>`}
+function topKeys(){const m=Math.max(...TYPES.map(x=>S.cnt[x.k]));return m?TYPES.filter(x=>S.cnt[x.k]===m).map(x=>x.k):[]}
+function tallyHTML(){const t=total();const top=topKeys();return `<div class="tl">총 ${t}건 <span>${t?'가장 많은 유형: '+TYPES.filter(x=>top.includes(x.k)).map(x=>x.n).join('·'):'+ 버튼을 눌러 세어보세요'}</span></div>${t?`<div class="bars">${TYPES.map(x=>{const p=Math.round(S.cnt[x.k]/t*100);return `<div class="bar${top.includes(x.k)?' top':''}"><b>${x.n}</b><span class="trk" role="img" aria-label="${x.n} ${S.cnt[x.k]}건 ${p}%"><i style="width:${S.cnt[x.k]/t*100}%"></i></span><em>${S.cnt[x.k]}건 · ${p}%</em></div>`}).join('')}</div>`:''}`}
 function stepW(){return `<section class="step"><p class="eyebrow">STEP 01 · 7일 분류</p><h2>최근 7일, 내 소비는 어떤 모양일까?</h2>
 <p class="lead">카드·페이 앱에서 최근 7일 결제 내역을 열어주세요. 한 건씩 보면서 네 가지 중 어디에 들어가는지 + 를 눌러요.</p>
 <p class="howto"><b>이렇게 해요</b><br>① 카드 앱·간편결제 앱의 이용 내역 열기<br>② 위에서부터 한 건씩, 해당 칸에 + 누르기<br>③ 헷갈리면 가장 가까운 칸에. 금액은 세지 않아도 돼요</p>
@@ -276,12 +282,15 @@ async function draw(){
  c.fillStyle='#A3A3A3';c.font=F(600,26);c.fillText('DAY 04. 소비는 감정이다',P,352);
  let y=400;
  // 7일 분류
- {const t=total();const hW=W-P*2;const bh=t?250:0;
+ {const t=total();const hW=W-P*2;const bh=t?84+4*56+28:0;
   if(t){c.fillStyle='#141414';rr(c,P,y,hW,bh,28);c.fill();
   c.fillStyle='#14FA32';c.font=F(800,22);c.fillText('01  최근 7일 분류',P+40,y+56);
   c.fillStyle='#A3A3A3';c.font=F(600,24);c.textAlign='right';c.fillText('총 '+t+'건',W-P-40,y+56);c.textAlign='left';
-  const bx=P+40,bw=hW-80,by=y+84;c.save();rr(c,bx,by,bw,30,10);c.clip();let x=bx;TYPES.forEach(tp=>{const w=bw*S.cnt[tp.k]/t;c.fillStyle=TCOL[tp.k];c.fillRect(x,by,w,30);x+=w});c.restore();
-  const cw=bw/4;TYPES.forEach((tp,i)=>{const cx=bx+i*cw;c.fillStyle=TCOL[tp.k];rr(c,cx,by+66,18,18,5);c.fill();c.fillStyle='#F5F5F5';c.font=F(800,28);c.fillText(tp.n,cx+28,by+84);c.fillStyle='#A3A3A3';c.font=F(700,28);c.fillText(S.cnt[tp.k]+'건',cx+28,by+124)});
+  const top=topKeys();const bx=P+40,lw=90,vw=200,tw=hW-80-lw-vw;TYPES.forEach((tp,i)=>{const ry=y+84+i*56;const on=top.includes(tp.k);const p=Math.round(S.cnt[tp.k]/t*100);
+   c.fillStyle='#F5F5F5';c.font=F(800,28);c.fillText(tp.n,bx,ry+30);
+   c.fillStyle='#1E1E1E';rr(c,bx+lw,ry+8,tw,26,13);c.fill();
+   const fw=tw*S.cnt[tp.k]/t;if(fw>0){c.fillStyle=on?'#14FA32':'#C9C9C3';rr(c,bx+lw,ry+8,Math.max(fw,26),26,13);c.fill()}
+   c.fillStyle=on?'#F5F5F5':'#A3A3A3';c.font=F(700,26);c.textAlign='right';c.fillText(S.cnt[tp.k]+'건 · '+p+'%',bx+lw+tw+vw,ry+30);c.textAlign='left'});
   y+=bh+20}}
  // 무엇을
  const box=(h)=>{c.fillStyle='#141414';rr(c,P,y,W-P*2,h,28);c.fill()};
