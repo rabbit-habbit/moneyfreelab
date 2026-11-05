@@ -3,79 +3,79 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080808">
+<meta name="theme-color" content="#F5F5F0">
 <meta name="description" content="머니프리랩 한 달 가계부 — 필요·투자·감정·습관 4유형으로 기록하고, 과소비 지수를 자동으로 계산해요.">
 <title>MONEY FREE LAB · 한 달 가계부</title>
 <style>
 @font-face{font-family:"Pretendard Variable";src:url("PretendardVariable.woff2") format("woff2");font-weight:45 920;font-display:swap}
 :root{
-  --bg:#080808;--card:#141414;--card2:#1E1E1E;--accent:#14FA32;--ink:#03210A;
-  --fg:#F5F5F5;--muted:#A3A3A3;--line:#303030;--faint:#6B6B6B;--warn:#14FA32;--err:#14FA32;
-  --t-need:#F5F5F5;--t-grow:#14FA32;--t-feel:#9A9A94;--t-auto:#4E4E4A;
+  --bg:#F5F5F0;--card:#FFFFFF;--card2:#F5F5F0;--accent:#14FA32;--ink:#0B0B0B;
+  --fg:#111111;--muted:#5F5F59;--line:#DDDDD6;--faint:#8C8C85;--warn:#0A7A22;--err:#0A7A22;
+  --t-need:#111111;--t-grow:#14FA32;--t-feel:#8C8C85;--t-auto:#CFCFC8;
   --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
-  color-scheme:dark;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.6;letter-spacing:-0.035em;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
 button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
 h1,h2,h3,p{margin:0}
-:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
 .wrap{width:100%;max-width:680px;margin:0 auto;padding-inline:20px}
 .topbar{border-bottom:1px solid var(--line)}
 .topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:16px}
-.brand{font-weight:800;font-size:15px;letter-spacing:-0.02em}
+.brand{font-weight:800;font-size:15px;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}.brand::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1.5px var(--ink)}
 .day{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
 .hero{padding-block:44px 8px}
 .hero-title{font-size:clamp(38px,11vw,72px);font-weight:800;letter-spacing:-0.06em;line-height:.98}
-.hero-title em{font-style:normal;color:var(--accent)}
+.hero-title em{font-style:normal;background:linear-gradient(transparent 58%,var(--accent) 58%,var(--accent) 92%,transparent 92%);padding:0 .04em}
 .hero-copy{margin-top:18px;font-size:clamp(19px,5vw,24px);font-weight:800;line-height:1.4;letter-spacing:-0.045em}
 .hero-sub{margin-top:8px;color:var(--muted);font-size:15px}
-.roadmap{margin-top:18px;border:1.5px solid var(--accent);border-radius:16px;padding:14px 16px}
-.roadmap b{color:var(--accent);font-size:14px;font-weight:800}
+.roadmap{margin-top:18px;background:#FFFFFF;border:1.5px solid var(--ink);border-radius:16px;padding:14px 16px}
+.roadmap b{display:inline-block;color:var(--ink);background:var(--accent);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:800}
 .roadmap p{margin-top:4px;font-size:14px;color:var(--fg);font-weight:600;line-height:1.55}
 .meta{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px}
-.meta li{font-size:13px;font-weight:600;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 12px;letter-spacing:-0.01em}
+.meta li{font-size:13px;font-weight:600;color:var(--muted);background:#FFFFFF;border:1px solid var(--line);border-radius:999px;padding:5px 12px;letter-spacing:-0.01em}
 
-.month{position:sticky;top:0;z-index:5;background:rgba(8,8,8,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-top:28px}
+.month{position:sticky;top:0;z-index:5;background:rgba(245,245,240,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-top:28px}
 .month .wrap{display:flex;align-items:center;justify-content:space-between;padding-block:10px}
 .month h2{font-size:20px;font-weight:800;letter-spacing:-0.04em}
-.mbtn{all:unset;cursor:pointer;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--fg);background:var(--card)}
-.mbtn:focus-visible{outline:2px solid var(--accent)}
+.mbtn{all:unset;cursor:pointer;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--fg);background:var(--card);border:1px solid var(--line);box-sizing:border-box}
+.mbtn:focus-visible{outline:2px solid var(--ink)}
 
 section.block{padding-top:28px}
-.eyebrow{font-size:13px;font-weight:800;color:var(--accent);letter-spacing:0}
-.block h3{margin-top:4px;font-size:22px;font-weight:800;letter-spacing:-0.045em;line-height:1.35}
+.eyebrow{display:inline-block;font-size:13px;font-weight:800;color:var(--ink);background:var(--accent);border-radius:999px;padding:3px 11px;letter-spacing:0}
+.block h3{margin-top:8px;font-size:22px;font-weight:800;letter-spacing:-0.045em;line-height:1.35}
 .lead{margin-top:6px;color:var(--muted);font-size:14px}
-.card{background:var(--card);border-radius:20px;padding:20px;margin-top:14px}
+.card{background:var(--card);border:1px solid #E6E6E0;border-radius:20px;padding:20px;margin-top:14px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .label{font-size:14px;font-weight:800;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
 .label small{font-weight:600;color:var(--muted);font-size:12px}
-.input{margin-top:8px;width:100%;background:var(--card2);border:1.5px solid transparent;border-radius:14px;padding:14px 14px;font-size:17px;font-weight:700;outline:none;transition:border-color .15s;min-height:52px}
-.input:focus{border-color:var(--accent)}
-.input::placeholder{color:#5f5f5f;font-weight:500}
+.input{margin-top:8px;width:100%;background:var(--card2);border:1.5px solid #E2E2DC;border-radius:14px;padding:14px 14px;font-size:17px;font-weight:700;outline:none;transition:border-color .15s;min-height:52px}
+.input:focus{border-color:var(--ink)}
+.input::placeholder{color:#A3A39C;font-weight:500}
 .money{position:relative}.money .input{padding-right:40px;text-align:right}
 .money span{position:absolute;right:14px;bottom:15px;color:var(--muted);font-weight:700;font-size:15px}
-input[type=date].input{color-scheme:dark}
+input[type=date].input{color-scheme:light}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.seg button{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid transparent;border-radius:14px;padding:12px 12px;display:flex;flex-direction:column;gap:2px}
+.seg button{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:12px 12px;display:flex;flex-direction:column;gap:2px}
 .seg b{font-size:17px;font-weight:800}.seg span{font-size:12px;color:var(--muted);font-weight:600}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--ink)}.seg button[aria-pressed="true"] span{color:var(--ink)}
-.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--ink);color:var(--ink)}.seg button[aria-pressed="true"] span{color:var(--ink)}
+.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 .score{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .score .num{font-size:64px;font-weight:800;letter-spacing:-0.05em;line-height:1;font-variant-numeric:tabular-nums}
 .score .num.empty{font-size:30px;color:var(--faint);line-height:1.3}
 .pill{display:inline-block;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:800;letter-spacing:-0.01em}
-.pill.ok{background:var(--accent);color:var(--ink)}
-.pill.near{background:transparent;border:1.5px solid var(--accent);color:var(--accent);padding:4.5px 10.5px}
-.pill.over{background:transparent;border:1.5px solid var(--accent);color:var(--accent);padding:4.5px 10.5px}
+.pill.ok{background:var(--accent);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.pill.near{background:#FFFFFF;border:1.5px solid var(--ink);color:var(--ink);padding:4.5px 10.5px}
+.pill.over{background:var(--ink);border:1.5px solid var(--ink);color:var(--accent);padding:4.5px 10.5px}
 .pill.none{background:var(--card2);color:var(--muted)}
 .formula{margin-top:12px;font-size:14px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
-.gauge{position:relative;height:12px;border-radius:6px;background:var(--card2);margin-top:22px}
+.gauge{position:relative;height:12px;border-radius:6px;background:#EDEDE7;margin-top:22px}
 .gauge i{position:absolute;left:0;top:0;bottom:0;border-radius:6px;background:var(--fg);transition:width .3s}
-.gauge .mk{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--accent)}
-.gauge .mk.k7{background:var(--accent);opacity:.45}
+.gauge .mk{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--accent);box-shadow:0 0 0 1px var(--ink)}
+.gauge .mk.k7{background:#BDBDB6;box-shadow:none}
 .gscale{position:relative;height:20px;margin-top:6px;font-size:11px;color:var(--faint);font-weight:700;letter-spacing:0}
 .gscale span{position:absolute;transform:translateX(-50%)}
 .cmp{margin-top:14px;font-size:14px;font-weight:700;color:var(--muted)}
@@ -83,35 +83,35 @@ input[type=date].input{color-scheme:dark}
 .budget{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
 .brow{display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:var(--muted);margin-top:6px;font-variant-numeric:tabular-nums}
 .brow b{color:var(--fg);font-weight:800}
-.bar{height:8px;border-radius:4px;background:var(--card2);margin-top:10px;overflow:hidden}
+.bar{height:8px;border-radius:4px;background:#EDEDE7;margin-top:10px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .3s}
-.bar i.over{background:var(--accent)}
+.bar i.over{background:var(--ink)}
 .help{margin-top:10px;font-size:13px;color:var(--muted)}
 
 .types{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
-.type{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid transparent;border-radius:14px;padding:12px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.type{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;display:flex;flex-direction:column;gap:2px}
 .type b{font-size:17px;font-weight:800}
 .type span{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:-0.01em}
-.type[aria-pressed="true"]{background:var(--accent);color:var(--ink)}.type[aria-pressed="true"] span{color:var(--ink)}
-.type:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.type[aria-pressed="true"]{background:var(--accent);border-color:var(--ink);color:var(--ink)}.type[aria-pressed="true"] span{color:var(--ink)}
+.type:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .tdesc{margin-top:8px;font-size:13px;color:var(--muted);min-height:1.6em}
 .worth{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .worth button{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border-radius:14px;padding:10px 4px;text-align:center;font-weight:800;font-size:14px}
 .worth button em{font-style:normal;font-size:18px;margin-right:4px}
-.worth button[aria-pressed="true"]{background:var(--fg);color:#080808}
-.worth button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.worth button[aria-pressed="true"]{background:var(--fg);color:#FFFFFF}
+.worth button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .f+.f{margin-top:18px}
 .check{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer}
 .check input{width:20px;height:20px;accent-color:var(--accent)}
 .err{margin-top:10px;color:var(--err);font-size:13px;font-weight:700;min-height:1em}
 .btn{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;border-radius:16px;padding:16px 18px;font-weight:800;font-size:16px;display:block}
-.btn.primary{background:var(--accent);color:var(--ink)}
-.btn.ghost{background:var(--card2);color:var(--fg)}
-.btn.outline{border:1.5px solid var(--line);color:var(--fg)}
+.btn.primary{background:var(--ink);color:var(--accent)}
+.btn.ghost{background:#E9E9E3;color:var(--fg)}
+.btn.outline{border:1.5px solid var(--ink);background:#FFFFFF;color:var(--fg)}
 .btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
 .btns{display:flex;gap:8px;margin-top:16px}.btns .btn{flex:1}
 
-.stack{display:flex;height:22px;border-radius:8px;overflow:hidden;background:var(--card2);margin-top:4px}
+.stack{display:flex;height:22px;border-radius:8px;overflow:hidden;background:#EDEDE7;margin-top:4px}
 .stack i{display:block;height:100%;transition:width .3s}
 .trow{display:grid;grid-template-columns:14px 1fr auto auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 .trow:last-child{border-bottom:none}
@@ -125,40 +125,40 @@ input[type=date].input{color-scheme:dark}
 
 .list .dh{font-size:13px;font-weight:800;color:var(--muted);margin-top:16px;padding-bottom:6px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
 .list .dh:first-child{margin-top:0}
-.item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #222}
+.item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #E6E6E0}
 .item .main{all:unset;cursor:pointer;flex:1;min-width:0;display:flex;align-items:center;gap:10px}
-.item .main:focus-visible{outline:2px solid var(--accent);border-radius:6px}
+.item .main:focus-visible{outline:2px solid var(--ink);border-radius:6px}
 .tg{flex:none;font-size:11px;font-weight:800;border-radius:6px;padding:3px 7px;letter-spacing:0}
 .item .t{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .item .t small{color:var(--muted);font-weight:600;margin-left:4px}
 .item .a{font-weight:800;font-variant-numeric:tabular-nums}
 .del{all:unset;cursor:pointer;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:18px}
-.del:hover{color:var(--accent);background:#0c1a0e}
-.del:focus-visible{outline:2px solid var(--accent)}
+.del:hover{color:var(--ink);background:#EAFBEC}
+.del:focus-visible{outline:2px solid var(--ink)}
 .empty{color:var(--muted);font-size:14px;text-align:center;padding:18px 0}
 .repeat{margin-top:12px}
 
 .sentence{margin-top:8px;background:var(--card2);border-radius:14px;padding:14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:17px;font-weight:800}
-.sentence input{flex:1 1 160px;min-width:0;background:transparent;border:none;border-bottom:2px solid var(--accent);padding:6px 2px;font-size:17px;font-weight:800;outline:none}
-.sentence input::placeholder{color:#5f5f5f;font-weight:600}
+.sentence input{flex:1 1 160px;min-width:0;background:linear-gradient(transparent 62%,rgba(20,250,50,.45) 62%);border:none;border-bottom:2.5px solid var(--ink);padding:6px 2px;font-size:17px;font-weight:800;outline:none}
+.sentence input::placeholder{color:#A3A39C;font-weight:600}
 .preview{margin-top:16px}
 .preview canvas{width:100%;height:auto;display:block;border-radius:14px}
 .links{display:flex;flex-direction:column;gap:10px}
 .links a.btn{text-decoration:none}
 .links a small{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-top:2px}
 .data .btn{font-size:14px;padding:13px 12px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--fg);color:#080808;border-radius:14px;padding:12px 16px;font-weight:800;font-size:14px;display:flex;gap:14px;align-items:center;transition:transform .25s;z-index:20;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--fg);color:#FFFFFF;border-radius:14px;padding:12px 16px;font-weight:800;font-size:14px;display:flex;gap:14px;align-items:center;transition:transform .25s;z-index:20;max-width:calc(100% - 32px)}
 .toast.on{transform:translateX(-50%) translateY(0)}
-.toast button{all:unset;cursor:pointer;color:#0a6b17;font-weight:900;text-decoration:underline}
+.toast button{all:unset;cursor:pointer;color:var(--accent);font-weight:900;text-decoration:underline}
 footer{border-top:1px solid var(--line);margin-top:36px}
 footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-height:1.7}
 .gscale span{white-space:nowrap}
 [hidden]{display:none!important}
 .pace{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.pace div{background:var(--card2);border-radius:14px;padding:12px 14px}
+.pace div{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
 .pace span{display:block;font-size:12px;color:var(--muted);font-weight:700}
 .pace b{display:block;font-size:20px;font-weight:800;letter-spacing:-0.04em;margin-top:2px;font-variant-numeric:tabular-nums}
-.pace .hot{grid-column:1/-1;background:var(--accent);color:var(--ink)}
+.pace .hot{grid-column:1/-1;background:var(--accent);border-color:var(--ink);color:var(--ink)}
 .pace .hot span{color:var(--ink)}
 .calsum{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .calsum span{font-size:13px;font-weight:800;border-radius:999px;padding:6px 12px;background:var(--card2)}
@@ -169,26 +169,26 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 .cal button:disabled{cursor:default;background:transparent}
 .cal button i{font-style:normal;font-size:12px;font-weight:800;letter-spacing:0;color:var(--muted)}
 .cal button em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:-0.02em;text-align:right;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
-.cal button.big em{color:var(--fg)}
-.cal button.big i{color:var(--fg)}
-.cal button.zero{background:var(--accent)}
+.cal button.big{background:var(--ink)}
+.cal button.big em,.cal button.big i{color:#FFFFFF}
+.cal button.zero{background:var(--accent);box-shadow:inset 0 0 0 1.5px var(--ink)}
 .cal button.zero i,.cal button.zero em{color:var(--ink)}
-.cal button.fut{background:#111}
-.cal button.fut i{color:#4a4a4a}
+.cal button.fut{background:#FAFAF7;box-shadow:inset 0 0 0 1px #ECECE6}
+.cal button.fut i{color:#BDBDB6}
 .cal button.today i{text-decoration:underline;text-underline-offset:3px}
 .cal button[aria-pressed="true"]{outline:2px solid var(--fg);outline-offset:1px}
-.cal button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.cal button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .clegend{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--muted);font-weight:700}
 .clegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
 .filter{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px;font-weight:800}
-.filter button{all:unset;cursor:pointer;font-size:13px;color:var(--accent);font-weight:800;text-decoration:underline}
+.filter button{all:unset;cursor:pointer;font-size:13px;color:var(--ink);font-weight:800;text-decoration:underline}
 .trend svg{width:100%;height:auto;display:block;margin-top:6px}
 .trend svg text{font-family:var(--font);font-weight:700;letter-spacing:0}
 .tlegend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-weight:700}
 .tlegend i{display:inline-block;width:12px;height:4px;border-radius:2px;margin-right:6px;vertical-align:3px}
 .tnote{margin-top:10px;font-size:13px;color:var(--muted)}
-.diarylink{display:block;margin-top:14px;background:var(--card2);border-radius:14px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--fg);text-decoration:none;line-height:1.5}
-.diarylink b{color:var(--accent)}
+.diarylink{display:block;margin-top:14px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--fg);text-decoration:none;line-height:1.5}
+.diarylink b{background:linear-gradient(transparent 55%,var(--accent) 55%)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (max-width:420px){.grid2{grid-template-columns:1fr}.score .num{font-size:56px}}
 </style>
@@ -318,10 +318,10 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 (function(){
 const KEY='mfl-ledger-v1';
 const TYPES=[
- {k:'need',n:'필요',g:'유지하기',d:'생활에 꼭 필요한 것 · 장보기, 교통비, 고장 나서 바꾼 물건',c:'#F5F5F5',tc:'#080808'},
- {k:'grow',n:'투자',g:'늘리기',d:'나를 키우거나 시간을 사는 것 · 책, 강의, 운동, 시간을 아껴주는 서비스',c:'#14FA32',tc:'#03210A'},
- {k:'feel',n:'감정',g:'들여다보기',d:'그때 기분 때문에 산 것 · 스트레스 풀기, 나한테 주는 보상, 불안해서',c:'#9A9A94',tc:'#080808'},
- {k:'auto',n:'습관',g:'들여다보기',d:'생각 없이 반복되는 것 · 안 쓰는 구독, 습관 배달, 매일 사는 음료',c:'#4E4E4A',tc:'#F5F5F5'}];
+ {k:'need',n:'필요',g:'유지하기',d:'생활에 꼭 필요한 것 · 장보기, 교통비, 고장 나서 바꾼 물건',c:'#111111',tc:'#FFFFFF'},
+ {k:'grow',n:'투자',g:'늘리기',d:'나를 키우거나 시간을 사는 것 · 책, 강의, 운동, 시간을 아껴주는 서비스',c:'#14FA32',tc:'#0B0B0B'},
+ {k:'feel',n:'감정',g:'들여다보기',d:'그때 기분 때문에 산 것 · 스트레스 풀기, 나한테 주는 보상, 불안해서',c:'#8C8C85',tc:'#FFFFFF'},
+ {k:'auto',n:'습관',g:'들여다보기',d:'생각 없이 반복되는 것 · 안 쓰는 구독, 습관 배달, 매일 사는 음료',c:'#CFCFC8',tc:'#111111'}];
 const TMAP=Object.fromEntries(TYPES.map(t=>[t.k,t]));
 const WORTH=[{k:'yes',s:'○',n:'있었다'},{k:'meh',s:'△',n:'애매'},{k:'no',s:'✕',n:'아깝다'}];
 const $=id=>document.getElementById(id);
@@ -455,7 +455,7 @@ function renderCal(){
     if(ds===t)cls+=' today';
     const lab=`${mm}월 ${d}일 ${v?won(v)+'원':(cls.includes('zero')?'무지출':'기록 없음')}`;
     h+=`<button type="button" class="${cls}" data-day="${ds}" aria-pressed="${SEL===ds}" aria-label="${lab}"><i>${d}</i><em>${v?shortWon(v):(cls.includes('zero')?'무지출':'')}</em></button>`}
-  h+='</div><div class="clegend"><span><i style="background:var(--accent)"></i>무지출 데이</span><span><i style="background:var(--fg)"></i>하루 예산보다 많이 쓴 날(흰 글씨, 매달 나가는 돈 제외)</span></div>';
+  h+='</div><div class="clegend"><span><i style="background:var(--accent)"></i>무지출 데이</span><span><i style="background:var(--ink)"></i>하루 예산보다 많이 쓴 날(검정 칸, 매달 나가는 돈 제외)</span></div>';
   h+='<p class="help">무지출 데이는 이번 달 첫 기록일부터 오늘까지 세요.</p>';
   el.innerHTML=h;
 }
@@ -464,18 +464,18 @@ function renderTrend(){
   const el=$('trend'),ms=[];for(let i=5;i>=0;i--)ms.push(shiftM(DB.cur,-i));
   const data=ms.map(m=>{const s=stats(m);return {m,idx:s.idx,fa:s.spent?(s.by.feel+s.by.auto)/s.spent:null}});
   const W=360,H=200,L=30,R=8,T=14,B=26,iw=W-L-R,ih=H-T-B,step=iw/6,Y=v=>T+ih*(1-Math.min(1,Math.max(0,v)));
-  let g='';[0,0.25,0.5,0.75,1].forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#262626" stroke-width="1"/><text x="${L-6}" y="${Y(v)+4}" font-size="10" fill="#6B6B6B" text-anchor="end">${v===0?'0':v.toFixed(2).replace(/0$/,'')}</text>`});
-  g+=`<line x1="${L}" x2="${W-R}" y1="${Y(DB.target)}" y2="${Y(DB.target)}" stroke="#14FA32" stroke-width="1.5" stroke-dasharray="5 5" opacity=".7"/><text x="${L+4}" y="${Y(DB.target)-5}" font-size="10" fill="#14FA32">기준 ${DB.target}</text>`;
-  data.forEach((d,i)=>{const cx=L+step*i+step/2;if(d.fa!=null){const bh=ih*Math.min(1,d.fa);g+=`<rect x="${cx-11}" y="${T+ih-bh}" width="22" height="${bh}" rx="4" fill="#4E4E4A"/>`}
-    g+=`<text x="${cx}" y="${H-8}" font-size="11" fill="${d.m===DB.cur?'#F5F5F5':'#8A8A84'}" text-anchor="middle">${Number(d.m.slice(5))}월</text>`});
+  let g='';[0,0.25,0.5,0.75,1].forEach(v=>{g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="#E2E2DC" stroke-width="1"/><text x="${L-6}" y="${Y(v)+4}" font-size="10" fill="#8C8C85" text-anchor="end">${v===0?'0':v.toFixed(2).replace(/0$/,'')}</text>`});
+  g+=`<line x1="${L}" x2="${W-R}" y1="${Y(DB.target)}" y2="${Y(DB.target)}" stroke="#0B0B0B" stroke-width="1.5" stroke-dasharray="5 5" opacity=".6"/><text x="${L+4}" y="${Y(DB.target)-5}" font-size="10" fill="#0B0B0B">기준 ${DB.target}</text>`;
+  data.forEach((d,i)=>{const cx=L+step*i+step/2;if(d.fa!=null){const bh=ih*Math.min(1,d.fa);g+=`<rect x="${cx-11}" y="${T+ih-bh}" width="22" height="${bh}" rx="4" fill="#CFCFC8"/>`}
+    g+=`<text x="${cx}" y="${H-8}" font-size="11" fill="${d.m===DB.cur?'#111111':'#8A8A84'}" text-anchor="middle">${Number(d.m.slice(5))}월</text>`});
   const pts=data.map((d,i)=>d.idx==null?null:[L+step*i+step/2,Y(d.idx),d.idx]);
   let path='',started=false;pts.forEach(p=>{if(!p){started=false;return}path+=(started?'L':'M')+p[0]+' '+p[1];started=true});
-  if(path)g+=`<path d="${path}" fill="none" stroke="#14FA32" stroke-width="2.5" stroke-linejoin="round"/>`;
-  pts.forEach(p=>{if(p)g+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#14FA32" stroke="#141414" stroke-width="2"/><text x="${p[0]}" y="${p[1]-9}" font-size="11" fill="#F5F5F5" text-anchor="middle">${f2(p[2])}</text>`});
+  if(path)g+=`<path d="${path}" fill="none" stroke="#0B0B0B" stroke-width="2.5" stroke-linejoin="round"/>`;
+  pts.forEach(p=>{if(p)g+=`<circle cx="${p[0]}" cy="${p[1]}" r="5" fill="#14FA32" stroke="#0B0B0B" stroke-width="2"/><text x="${p[0]}" y="${p[1]-10}" font-size="11" fill="#111111" text-anchor="middle">${f2(p[2])}</text>`});
   const n=data.filter(d=>d.idx!=null||d.fa!=null).length;
-  el.innerHTML=`<div class="label">최근 6개월 추이</div><div class="tlegend" style="margin-top:8px"><span><i style="background:#14FA32"></i>과소비 지수</span><span><i style="background:#4E4E4A;height:10px;width:10px;vertical-align:-1px"></i>감정+습관 비율</span></div>
+  el.innerHTML=`<div class="label">최근 6개월 추이</div><div class="tlegend" style="margin-top:8px"><span><i style="background:#0B0B0B"></i>과소비 지수</span><span><i style="background:#CFCFC8;height:10px;width:10px;vertical-align:-1px"></i>감정+습관 비율</span></div>
   <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="최근 6개월 과소비 지수와 감정·습관 소비 비율">${g}</svg>
-  <p class="tnote">${n<2?'두 달 이상 기록하면 지난달과 비교하는 그래프가 그려져요.':'선은 내려가고, 회색 막대는 짧아질수록 좋아요.'}</p>`;
+  <p class="tnote">${n<2?'두 달 이상 기록하면 지난달과 비교하는 그래프가 그려져요.':'검정 선은 내려가고, 회색 막대는 짧아질수록 좋아요.'}</p>`;
 }
 
 /* ---------- 입력 ---------- */
@@ -537,35 +537,37 @@ async function draw(){
   const cv=$('cv'),c=cv.getContext('2d');try{await Promise.all([document.fonts.load(FT(800,40)),document.fonts.load(FT(600,30))])}catch(e){}
   const W=1080,H=1350,P=72,o=M(),s=stats(DB.cur),show=$('rshow').checked,t=DB.target;
   const LS=v=>{if('letterSpacing' in c)c.letterSpacing=v};
-  c.fillStyle='#080808';c.fillRect(0,0,W,H);c.textBaseline='alphabetic';LS('-1px');
-  c.fillStyle='#F5F5F5';c.font=FT(800,26);c.fillText('MONEY FREE LAB',P,92);
-  c.fillStyle='#A3A3A3';c.font=FT(600,24);c.textAlign='right';c.fillText(mLabel(DB.cur)+' 결산',W-P,92);c.textAlign='left';
-  c.fillStyle='#303030';c.fillRect(P,118,W-P*2,2);
-  LS('-4px');c.fillStyle='#F5F5F5';c.font=FT(800,76);c.fillText('MY MONEY',P,222);c.fillStyle='#14FA32';c.fillText('REPORT',P,302);LS('-1px');
+  c.fillStyle='#F5F5F0';c.fillRect(0,0,W,H);c.textBaseline='alphabetic';LS('-1px');
+  const lab=(tx,x,yy)=>{c.font=FT(800,22);const w=c.measureText(tx).width;c.fillStyle='#14FA32';rr(c,x-12,yy-28,w+24,38,19);c.fill();c.fillStyle='#0B0B0B';c.fillText(tx,x,yy)};
+  const card=(x,yy,w,h)=>{c.fillStyle='#FFFFFF';rr(c,x,yy,w,h,28);c.fill();c.strokeStyle='#E2E2DC';c.lineWidth=2;c.stroke()};
+  c.fillStyle='#111111';c.font=FT(800,26);c.fillText('MONEY FREE LAB',P,92);
+  c.fillStyle='#5F5F59';c.font=FT(600,24);c.textAlign='right';c.fillText(mLabel(DB.cur)+' 결산',W-P,92);c.textAlign='left';
+  c.fillStyle='#DDDDD6';c.fillRect(P,118,W-P*2,2);
+  LS('-4px');c.fillStyle='#111111';c.font=FT(800,76);c.fillText('MY MONEY',P,222);{const rw=c.measureText('REPORT').width;c.fillStyle='#14FA32';c.fillRect(P-4,272,rw+12,36)}c.fillStyle='#111111';c.fillText('REPORT',P,302);LS('-1px');
   // 과소비 지수
-  let y=350;c.fillStyle='#141414';rr(c,P,y,W-P*2,220,28);c.fill();
-  c.fillStyle='#14FA32';c.font=FT(800,22);c.fillText('과소비 지수',P+40,y+58);
-  c.fillStyle='#A3A3A3';c.font=FT(600,24);c.textAlign='right';c.fillText('나의 기준 '+t+' 이하',W-P-40,y+58);c.textAlign='left';
-  LS('-5px');c.fillStyle='#F5F5F5';c.font=FT(800,120);c.fillText(s.idx==null?'—':f2(s.idx),P+36,y+172);LS('-1px');
-  if(s.idx!=null){const ok=s.idx<=t+1e-9;c.font=FT(800,28);const lab=ok?'기준 달성':(s.idx<=t+0.1?'조금만 더':'다음 달 다시 도전');const lw=c.measureText(lab).width+44;c.fillStyle=ok?'#14FA32':'#2a2a2a';rr(c,W-P-40-lw,y+124,lw,56,28);c.fill();c.fillStyle=ok?'#03210A':'#F5F5F5';c.fillText(lab,W-P-40-lw+22,y+162)}
+  let y=350;card(P,y,W-P*2,220);
+  lab('과소비 지수',P+40,y+58);
+  c.fillStyle='#5F5F59';c.font=FT(600,24);c.textAlign='right';c.fillText('나의 기준 '+t+' 이하',W-P-40,y+58);c.textAlign='left';
+  LS('-5px');c.fillStyle='#111111';c.font=FT(800,120);c.fillText(s.idx==null?'—':f2(s.idx),P+36,y+172);LS('-1px');
+  if(s.idx!=null){const ok=s.idx<=t+1e-9;c.font=FT(800,28);const lab=ok?'기준 달성':(s.idx<=t+0.1?'조금만 더':'다음 달 다시 도전');const lw=c.measureText(lab).width+44;c.fillStyle=ok?'#14FA32':'#EDEDE6';rr(c,W-P-40-lw,y+124,lw,56,28);c.fill();if(ok){c.strokeStyle='#0B0B0B';c.lineWidth=2;c.stroke()}c.fillStyle='#0B0B0B';c.fillText(lab,W-P-40-lw+22,y+162)}
   y+=220+20;
   // 유형 비율
-  const bh=300;c.fillStyle='#141414';rr(c,P,y,W-P*2,bh,28);c.fill();
-  c.fillStyle='#14FA32';c.font=FT(800,22);c.fillText('내 소비의 모양',P+40,y+58);
-  if(show&&s.spent){c.fillStyle='#A3A3A3';c.font=FT(600,24);c.textAlign='right';c.fillText('총지출 '+won(s.spent)+'원',W-P-40,y+58);c.textAlign='left'}
-  const bx=P+40,bw=W-P*2-80,by=y+90;c.fillStyle='#1E1E1E';rr(c,bx,by,bw,40,12);c.fill();
+  const bh=300;card(P,y,W-P*2,bh);
+  lab('내 소비의 모양',P+40,y+58);
+  if(show&&s.spent){c.fillStyle='#5F5F59';c.font=FT(600,24);c.textAlign='right';c.fillText('총지출 '+won(s.spent)+'원',W-P-40,y+58);c.textAlign='left'}
+  const bx=P+40,bw=W-P*2-80,by=y+90;c.fillStyle='#EDEDE6';rr(c,bx,by,bw,40,12);c.fill();
   if(s.spent){c.save();rr(c,bx,by,bw,40,12);c.clip();let x=bx;TYPES.forEach(tp=>{const w=bw*s.by[tp.k]/s.spent;c.fillStyle=tp.c;c.fillRect(x,by,w,40);x+=w});c.restore()}
-  const cw=bw/2;TYPES.forEach((tp,i)=>{const cx=bx+(i%2)*cw,cy=by+100+Math.floor(i/2)*80;c.fillStyle=tp.c;rr(c,cx,cy-24,22,22,6);c.fill();c.fillStyle='#F5F5F5';c.font=FT(800,32);c.fillText(tp.n,cx+36,cy-1);const p=s.spent?Math.round(s.by[tp.k]/s.spent*100):0;c.fillStyle='#A3A3A3';c.font=FT(700,30);c.fillText(p+'%',cx+120,cy-1);if(show&&s.spent){c.font=FT(600,22);c.fillText(won(s.by[tp.k])+'원',cx+200,cy-3)}});
+  const cw=bw/2;TYPES.forEach((tp,i)=>{const cx=bx+(i%2)*cw,cy=by+100+Math.floor(i/2)*80;c.fillStyle=tp.c;rr(c,cx,cy-24,22,22,6);c.fill();c.fillStyle='#111111';c.font=FT(800,32);c.fillText(tp.n,cx+36,cy-1);const p=s.spent?Math.round(s.by[tp.k]/s.spent*100):0;c.fillStyle='#5F5F59';c.font=FT(700,30);c.fillText(p+'%',cx+120,cy-1);if(show&&s.spent){c.font=FT(600,22);c.fillText(won(s.by[tp.k])+'원',cx+200,cy-3)}});
   y+=bh+20;
   // 숫자로 본 한 달
   const cs=calStats(DB.cur);const nx=[o.up?'늘릴 소비 → '+o.up:'',o.down?'줄일 소비 → '+o.down:''].filter(Boolean);
   const th=196+(nx.length?nx.length*40+14:0)+20;
-  c.fillStyle='#F5F5F5';rr(c,P,y,W-P*2,th,28);c.fill();
-  c.fillStyle='#0B0B0B';c.font=FT(800,22);c.fillText('숫자로 본 한 달',P+40,y+58);
+  c.fillStyle='#FFFFFF';rr(c,P,y,W-P*2,th,28);c.fill();c.strokeStyle='#0B0B0B';c.lineWidth=3;c.stroke();
+  lab('숫자로 본 한 달',P+40,y+58);
   const cells=[['무지출 데이',cs.zero+'일'],['기록',s.count+'건'],show&&s.spent?['하루 평균',won(s.spent/Math.max(1,cs.days))+'원']:['감정+습관',(s.spent?Math.round((s.by.feel+s.by.auto)/s.spent*100):0)+'%']];
   const cw3=(W-P*2-80)/3;cells.forEach(([k,v],i)=>{const x=P+40+i*cw3;c.fillStyle='#6B6B66';c.font=FT(700,24);c.fillText(k,x,y+104);c.font=FT(800,52);if(i===0){const vw=c.measureText(v).width;c.fillStyle='#14FA32';c.fillRect(x-4,y+152,vw+8,18)}c.fillStyle='#0B0B0B';c.fillText(v,x,y+166)});
   c.fillStyle='#4A4A47';c.font=FT(600,26);nx.forEach((l,i)=>c.fillText(wrapT(c,l,W-P*2-80)[0],P+40,y+222+i*40));
-  c.fillStyle='#6B6B6B';c.font=FT(600,20);c.fillText('MONEY FREE LAB · 머니프리랩',P,H-56);c.textAlign='right';c.fillText('한 달 가계부',W-P,H-56);c.textAlign='left';
+  c.fillStyle='#8C8C85';c.font=FT(600,20);c.fillText('MONEY FREE LAB · 머니프리랩',P,H-56);c.textAlign='right';c.fillText('한 달 가계부',W-P,H-56);c.textAlign='left';
 }
 $('dl').addEventListener('click',async()=>{await draw();$('cv').toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_'+DB.cur+'_결산.png';const file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'한 달 결산'});return}catch(e){if(e&&e.name==='AbortError')return}}
