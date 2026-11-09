@@ -195,6 +195,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 .keep p{margin-top:6px;color:var(--fg);font-weight:600}
 .keep p.warn{background:var(--accent);border-radius:10px;padding:8px 10px;color:var(--ink);font-weight:800}
 .keep .kb{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-weight:700;font-size:13px}
+.keep .kb{flex-wrap:wrap}.keep .kb2{display:flex;gap:8px;width:100%}.keep .kb2 button{flex:1;text-align:center}
 .keep .kb button{all:unset;cursor:pointer;flex:none;background:var(--ink);color:var(--accent);border-radius:10px;padding:8px 12px;font-weight:800;font-size:13px}
 .cur{all:unset;cursor:pointer;font-size:13px;font-weight:800;color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:2px 8px;background:#FFFFFF}
 .cur:focus-visible{outline:2px solid var(--ink)}
@@ -323,7 +324,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
         <button type="button" class="btn outline" id="clear">이번 달 기록 지우기</button>
       </div>
       <input type="file" id="file" accept="application/json,.json" class="sr" tabindex="-1" aria-hidden="true">
-      <div class="paste" id="pastebox" hidden><p class="help" id="pastehelp">복사해 둔 백업 내용을 아래에 붙여넣어 주세요.</p><textarea id="pastetxt" placeholder='{"v":1, ... 로 시작하는 백업 내용'></textarea><div class="btns"><button type="button" class="btn ghost" id="pastefile">백업 파일 고르기</button><button type="button" class="btn primary" id="pasteok">붙여넣은 내용 불러오기</button></div></div>
+      <div class="paste" id="pastebox" hidden><p class="help" id="pastehelp">카카오톡 등에서 복사해 둔 백업 내용을 아래에 붙여넣거나, 백업 파일을 골라주세요.</p><textarea id="pastetxt" placeholder='{"v":1, ... 로 시작하는 백업 내용'></textarea><div class="btns"><button type="button" class="btn ghost" id="pastefile">백업 파일 고르기</button><button type="button" class="btn primary" id="pasteok">붙여넣은 내용 불러오기</button></div></div>
       <p class="err" id="derr" role="alert"></p>
     </div>
   </section>
@@ -393,18 +394,31 @@ function renderMonth(){
 }
 function renderAll(){renderKeep();renderIdx();renderSum();renderCal();renderList();renderTrend();drawSoon()}
 
+function openExternal(){const u=location.href.split('#')[0];
+  if(IN_KAKAO){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(u);return}
+  copyText(u).then(()=>toast('주소를 복사했어요. 크롬·사파리 주소창에 붙여넣어 주세요'))}
 function renderKeep(){
   let total=0;Object.values(DB.months).forEach(o=>{total+=(o.entries||[]).length});
-  const env=IN_KAKAO?'지금은 <b>카카오톡 안</b>에서 열었어요. 다음에도 꼭 <b>카카오톡에서 이 링크</b>를 열어주세요. 크롬·사파리로 열면 기록이 보이지 않아요.'
-    :(IN_APP?'지금은 <b>앱 안의 브라우저</b>에서 열었어요. 다음에도 같은 앱에서 이 링크를 열어주세요. 다른 브라우저로 열면 기록이 보이지 않아요.'
-    :'지금 연 <b>이 브라우저</b>(크롬·사파리 등)로 다음에도 열어주세요. 카카오톡 안에서 열면 기록이 보이지 않아요.');
-  let h=`<b>📌 기록은 처음 연 곳에만 저장돼요</b><p>${env}</p>`;
-  if(IS_IOS&&!IN_APP)h+=`<p>아이폰 사파리는 <b>7일 넘게 안 들어오면</b> 기록을 지울 수 있어요. 공유 버튼 → <b>'홈 화면에 추가'</b>로 열면 지워지지 않아요.</p>`;
+  const how=IN_KAKAO?'':'<p>오른쪽 위 메뉴(⋮ 또는 ···)에서 <b>\'다른 브라우저로 열기\'</b>를 눌러도 돼요.</p>';
+  let h='',btn='<button type="button" id="kbak">지금 백업</button>';
+  if(IN_APP&&!total){
+    h=`<b>📌 크롬·사파리로 열어서 써주세요</b><p>지금은 <b>${IN_KAKAO?'카카오톡':'앱'} 안</b>에서 열었어요. 앱 안에서는 기록이 지워지기 쉽고, 이미지·백업 파일 저장도 잘 안 돼요. 한 달 동안 쓸 가계부라 <b>크롬·사파리로 열어서</b> 시작하는 걸 추천해요.</p>${how}`;
+    btn='<button type="button" id="kext">크롬·사파리로 열기</button>';
+  }else if(IN_APP){
+    h=`<b>📌 지금 기록은 ${IN_KAKAO?'카카오톡':'앱'} 안에만 저장돼 있어요</b><p>앱 안에서는 기록이 지워지기 쉬워요. 크롬·사파리로 옮겨서 쓰는 걸 추천해요.</p>
+      <p><b>① 백업 복사</b> → <b>② 크롬·사파리로 열기</b> → <b>③ 거기서 아래 '백업 불러오기'에 붙여넣기</b></p>
+      <p style="color:var(--muted)">옮기기 번거로우면 지금처럼 ${IN_KAKAO?'카카오톡':'이 앱'}에서 계속 써도 괜찮아요. 대신 꼭 같은 곳에서 열어주세요.</p>${how}`;
+    btn='<span class="kb2"><button type="button" id="kbak">① 백업 복사</button><button type="button" id="kext">② 크롬·사파리로 열기</button></span>';
+  }else{
+    h=`<b>📌 기록은 처음 연 곳에만 저장돼요</b><p>지금 연 <b>이 브라우저</b>(크롬·사파리 등)로 다음에도 열어주세요. 카카오톡 안에서 열면 기록이 보이지 않아요.</p>`;
+    if(!total)h+=`<p>카카오톡에서 쓰던 기록이 있다면, 카톡에서 '백업 복사'한 뒤 아래 <b>'백업 불러오기'</b>에 붙여넣으면 옮겨져요.</p>`;
+    if(IS_IOS)h+=`<p>아이폰 사파리는 <b>7일 넘게 안 들어오면</b> 기록을 지울 수 있어요. 공유 버튼 → <b>'홈 화면에 추가'</b>로 열면 지워지지 않아요.</p>`;
+  }
   const lb=DB.lastBackup||'';
   const stale=total>0&&(!lb||(Date.now()-new Date(lb+'T00:00:00').getTime())>14*864e5);
-  if(stale)h+=`<p class="warn">${lb?'마지막 백업이 2주가 넘었어요.':'아직 백업한 적이 없어요.'} 폰을 바꾸거나 기록이 지워져도 되살릴 수 있게 백업해 두세요.</p>`;
-  h+=`<div class="kb"><span>저장된 기록 ${total}건 · 마지막 백업 ${lb?lb.slice(5).replace('-','/'):'없음'}</span><button type="button" id="kbak">지금 백업</button></div>`;
-  $('keep').innerHTML=h;$('kbak').onclick=doBackup;
+  if(stale&&!IN_APP)h+=`<p class="warn">${lb?'마지막 백업이 2주가 넘었어요.':'아직 백업한 적이 없어요.'} 폰을 바꾸거나 기록이 지워져도 되살릴 수 있게 백업해 두세요.</p>`;
+  h+=`<div class="kb"><span>저장된 기록 ${total}건 · 마지막 백업 ${lb?lb.slice(5).replace('-','/'):'없음'}</span>${btn}</div>`;
+  $('keep').innerHTML=h;const b=$('kbak');if(b)b.onclick=doBackup;const x=$('kext');if(x)x.onclick=openExternal;
 }
 
 function renderIdx(){
@@ -621,7 +635,7 @@ function doBackup(){
 }
 function applyBackup(text){const d=JSON.parse(text);if(!d||d.v!==1||typeof d.months!=='object')throw 0;DB=d;DB.cur=ym(new Date());if(!DB.rates||typeof DB.rates!=='object')DB.rates={};if(!DB.fx||typeof DB.fx!=='object')DB.fx={};save();renderMonth();$('derr').textContent='';$('pastebox').hidden=true;$('pastetxt').value='';toast('백업을 불러왔어요')}
 $('backup').addEventListener('click',doBackup);
-$('restore').addEventListener('click',()=>{if(IN_APP){$('pastebox').hidden=false;$('pastetxt').focus();return}$('file').click()});
+$('restore').addEventListener('click',()=>{$('pastebox').hidden=false;$('pastetxt').focus()});
 $('pastefile').addEventListener('click',()=>$('file').click());
 $('pasteok').addEventListener('click',()=>{const t=$('pastetxt').value.trim();if(!t){$('derr').textContent='백업 내용을 붙여넣어 주세요.';return}try{applyBackup(t)}catch(_){$('derr').textContent='머니프리랩 가계부 백업 내용이 아니에요. 처음부터 끝까지 다 붙여넣었는지 확인해 주세요.'}});
 $('file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{applyBackup(r.result)}catch(_){$('derr').textContent='머니프리랩 가계부 백업 파일이 아니에요.'}};r.readAsText(f);e.target.value=''});
