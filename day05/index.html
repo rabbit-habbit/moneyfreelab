@@ -190,6 +190,19 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 .diarylink{display:block;margin-top:14px;background:#FFFFFF;border:1px solid #E6E6E0;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:700;color:var(--fg);text-decoration:none;line-height:1.5}
 .diarylink b{background:linear-gradient(transparent 55%,var(--accent) 55%)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.keep{margin-top:12px;background:#FFFFFF;border:1.5px solid var(--ink);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.55}
+.keep>b{display:block;font-size:15px;font-weight:800}
+.keep p{margin-top:6px;color:var(--fg);font-weight:600}
+.keep p.warn{background:var(--accent);border-radius:10px;padding:8px 10px;color:var(--ink);font-weight:800}
+.keep .kb{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-weight:700;font-size:13px}
+.keep .kb button{all:unset;cursor:pointer;flex:none;background:var(--ink);color:var(--accent);border-radius:10px;padding:8px 12px;font-weight:800;font-size:13px}
+.cur{all:unset;cursor:pointer;font-size:13px;font-weight:800;color:var(--ink);border:1.5px solid var(--line);border-radius:8px;padding:2px 8px;background:#FFFFFF}
+.cur:focus-visible{outline:2px solid var(--ink)}
+.fxeq{margin-top:6px;font-size:13px;font-weight:800;color:var(--fg);font-variant-numeric:tabular-nums}
+.paste textarea{width:100%;min-height:90px;margin-top:10px;background:var(--card2);border:1.5px solid #E2E2DC;border-radius:14px;padding:12px;font-size:13px;resize:vertical}
+.saveimg{margin-top:14px;text-align:center}
+.saveimg img{width:100%;border-radius:14px;display:block;border:1.5px solid var(--ink)}
+.saveimg p{margin-top:8px;font-size:14px;font-weight:800}
 @media (max-width:420px){.grid2{grid-template-columns:1fr}.score .num{font-size:56px}}
 </style>
 </head>
@@ -201,7 +214,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
   <p class="hero-copy">얼마 썼는지보다,<br>어떤 소비를 했는지 보는 가계부.</p>
   <p class="hero-sub">쓸 때마다 한 줄, 유형 하나만 고르면 과소비 지수는 자동으로 계산돼요.</p>
   <ul class="meta"><li>필요·투자·감정·습관 4유형</li><li>과소비 지수 자동 계산</li><li>이 기기에만 저장</li></ul>
-  <div class="roadmap"><b>오늘부터 채워주세요</b><p>4주차에 '나의 자산 로드맵'을 그릴 때, 내가 평소 한 달에 얼마나 쓰는지가 꼭 필요해요. 오늘 첫 기록을 남기고, 4주 동안 차곡차곡 쌓아가요.</p></div>
+  <div class="keep" id="keep" aria-live="polite"></div>
 </div>
 
 <nav class="month" aria-label="월 선택"><div class="wrap">
@@ -240,14 +253,17 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
     <form class="card" id="form" novalidate>
       <div class="grid2">
         <div><label class="label" for="fdate">날짜</label><input class="input" type="date" id="fdate"></div>
-        <div><label class="label" for="famt">금액</label><div class="money"><input class="input" id="famt" inputmode="numeric" autocomplete="off" placeholder="0"><span>원</span></div></div>
+        <div><div class="label"><label for="famt">금액</label><select class="cur" id="fcur" aria-label="통화 선택"></select></div><div class="money"><input class="input" id="famt" inputmode="decimal" autocomplete="off" placeholder="0"><span id="funit">원</span></div></div>
       </div>
+      <p class="help" id="fdatehelp">📅 날짜 칸의 달력 아이콘을 누르면 지난달 날짜도 바로 고를 수 있어요.</p>
+      <div class="f" id="fxrow" style="margin-top:18px" hidden><label class="label" for="frate"><span id="fxlab">1달러 =</span><small id="fxsrc">환율</small></label><div class="money"><input class="input" id="frate" inputmode="decimal" autocomplete="off" placeholder="1,400"><span>원</span></div><p class="fxeq" id="fxeq"></p><p class="help" id="fxhelp">고른 날짜가 있는 달의 <b>평균 환율</b>(유럽중앙은행 공개 환율)로 자동 계산해요. 직접 고쳐 써도 돼요.</p></div>
       <div class="f"><label class="label" for="fitem">무엇을 <small id="fcount">0/30</small></label><input class="input" id="fitem" maxlength="30" autocomplete="off" placeholder="예) 퇴근길 배달 떡볶이"></div>
       <div class="f"><div class="label">어떤 소비였나요?</div>
         <div class="types" role="group" aria-label="소비 유형" id="ftypes"></div>
         <p class="tdesc" id="tdesc">네 가지 중 하나를 골라주세요.</p>
       </div>
-      <label class="check"><input type="checkbox" id="frep"> 매달 나가는 돈이에요 (다음 달에 불러오기)</label>
+      <label class="check"><input type="checkbox" id="frep"> 매달 나가는 돈이에요 (할부·구독·월세·보험 등)</label>
+      <p class="help">체크하면 <b>하루 예산 계산에서 빠지고</b>, 다음 달에 버튼 한 번으로 불러올 수 있어요.</p>
       <p class="err" id="ferr" role="alert"></p>
       <div class="btns"><button type="button" class="btn ghost" id="fcancel" hidden>취소</button><button type="submit" class="btn primary" id="fsubmit">기록 추가</button></div>
     </form>
@@ -284,6 +300,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
       <label class="check"><input type="checkbox" id="rshow"> 결산 이미지에 금액도 표시하기</label>
       <div class="preview"><canvas id="cv" width="1080" height="1350" role="img" aria-label="한 달 결산 이미지 미리보기"></canvas></div>
       <div class="btns"><button type="button" class="btn primary" id="dl">결산 이미지 저장하기</button></div>
+      <div class="saveimg" id="saveimgbox" hidden><img id="saveimg" alt="한 달 결산 이미지"><p>👆 이미지를 길게 눌러 저장해 주세요</p></div>
     </div>
   </section>
 
@@ -297,7 +314,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 
   <section class="block" aria-labelledby="h-data">
     <h3 id="h-data">내 기록 관리</h3>
-    <p class="lead">기록은 이 폰(브라우저)에만 저장돼요. 다른 기기로 옮기거나 지켜두려면 백업 파일을 저장하세요.</p>
+    <p class="lead">기록은 이 폰(브라우저)에만 저장돼요. 다른 기기로 옮기거나 지켜두려면 2주에 한 번 백업해 두세요. 카카오톡 안에서는 백업 내용이 복사되니 '나와의 채팅'에 붙여넣어 보관하면 돼요.</p>
     <div class="card data">
       <div class="grid2">
         <button type="button" class="btn ghost" id="csv">엑셀용 CSV 받기</button>
@@ -306,12 +323,13 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
         <button type="button" class="btn outline" id="clear">이번 달 기록 지우기</button>
       </div>
       <input type="file" id="file" accept="application/json,.json" class="sr" tabindex="-1" aria-hidden="true">
+      <div class="paste" id="pastebox" hidden><p class="help" id="pastehelp">복사해 둔 백업 내용을 아래에 붙여넣어 주세요.</p><textarea id="pastetxt" placeholder='{"v":1, ... 로 시작하는 백업 내용'></textarea><div class="btns"><button type="button" class="btn ghost" id="pastefile">백업 파일 고르기</button><button type="button" class="btn primary" id="pasteok">붙여넣은 내용 불러오기</button></div></div>
       <p class="err" id="derr" role="alert"></p>
     </div>
   </section>
 </main>
 
-<footer><div class="wrap">© MONEY FREE LAB | 머니프리랩 제작<br>입력한 내용은 서버로 보내지 않고 이 기기의 브라우저에만 저장돼요. 브라우저 기록을 지우면 함께 지워질 수 있으니 가끔 백업해 주세요.</div></footer>
+<footer><div class="wrap">© MONEY FREE LAB | 머니프리랩 제작<br>입력한 내용은 서버로 보내지 않고 이 기기의 브라우저에만 저장돼요. 외화 기록 때는 공개 환율(유럽중앙은행 기준)만 불러와요. 브라우저 기록을 지우면 함께 지워질 수 있으니 가끔 백업해 주세요.</div></footer>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="tmsg"></span><button type="button" id="tundo" hidden>되돌리기</button></div>
 
 <script>
@@ -340,8 +358,21 @@ let DB=load();
 function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===1&&r.months)return r}catch(e){}return {v:1,target:0.5,months:{},cur:ym(new Date())}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
 function M(m){m=m||DB.cur;if(!DB.months[m]){const pv=DB.months[shiftM(m,-1)];DB.months[m]={income:pv&&pv.income?pv.income:'',saving:'',entries:[],trig:'',up:'',down:''}}const o=DB.months[m];if(!Array.isArray(o.entries))o.entries=[];return o}
-if(!/^\d{4}-\d{2}$/.test(DB.cur||''))DB.cur=ym(new Date());
+// 열 때마다 이번 달에서 시작 (지난번에 보던 달이 남아 있으면 날짜가 그 달 1일로 들어가던 문제)
+DB.cur=ym(new Date());
 if(DB.target!==0.5&&DB.target!==0.7)DB.target=0.5;
+if(!DB.rates||typeof DB.rates!=='object')DB.rates={};
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+const UA=navigator.userAgent||'';
+const IN_KAKAO=/KAKAOTALK/i.test(UA);
+const IN_APP=IN_KAKAO||/NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp/i.test(UA);
+const IS_IOS=/iPhone|iPad|iPod/i.test(UA);
+/* ---------- 통화 ---------- */
+const CUR=[{k:'KRW',n:'원',l:'원화',u:1},{k:'USD',n:'미국 달러',l:'미국 달러 USD',u:1},{k:'CAD',n:'캐나다 달러',l:'캐나다 달러 CAD',u:1},{k:'AUD',n:'호주 달러',l:'호주 달러 AUD',u:1},{k:'JPY',n:'엔',l:'일본 엔 JPY',u:100},{k:'EUR',n:'유로',l:'유로 EUR',u:1},{k:'CNY',n:'위안',l:'중국 위안 CNY',u:1}];
+const CMAP=Object.fromEntries(CUR.map(c=>[c.k,c]));
+const numF=v=>{const s=String(v==null?'':v).replace(/[^0-9.]/g,'');const p=s.split('.');const n=Number(p[0]+(p.length>1?'.'+p.slice(1).join(''):''));return isFinite(n)?n:0};
+const fmtF=n=>{const [a,b]=String(Math.round(n*100)/100).split('.');return Number(a).toLocaleString('ko-KR')+(b?'.'+b:'')};
+const fxLabel=c=>(c.u===1?'1':c.u.toLocaleString('ko-KR'))+c.n+' =';
 
 /* ---------- 계산 ---------- */
 function stats(m){
@@ -360,7 +391,21 @@ function renderMonth(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(Number(b.dataset.target)===DB.target)));
   resetForm();renderAll();
 }
-function renderAll(){renderIdx();renderSum();renderCal();renderList();renderTrend();drawSoon()}
+function renderAll(){renderKeep();renderIdx();renderSum();renderCal();renderList();renderTrend();drawSoon()}
+
+function renderKeep(){
+  let total=0;Object.values(DB.months).forEach(o=>{total+=(o.entries||[]).length});
+  const env=IN_KAKAO?'지금은 <b>카카오톡 안</b>에서 열었어요. 다음에도 꼭 <b>카카오톡에서 이 링크</b>를 열어주세요. 크롬·사파리로 열면 기록이 보이지 않아요.'
+    :(IN_APP?'지금은 <b>앱 안의 브라우저</b>에서 열었어요. 다음에도 같은 앱에서 이 링크를 열어주세요. 다른 브라우저로 열면 기록이 보이지 않아요.'
+    :'지금 연 <b>이 브라우저</b>(크롬·사파리 등)로 다음에도 열어주세요. 카카오톡 안에서 열면 기록이 보이지 않아요.');
+  let h=`<b>📌 기록은 처음 연 곳에만 저장돼요</b><p>${env}</p>`;
+  if(IS_IOS&&!IN_APP)h+=`<p>아이폰 사파리는 <b>7일 넘게 안 들어오면</b> 기록을 지울 수 있어요. 공유 버튼 → <b>'홈 화면에 추가'</b>로 열면 지워지지 않아요.</p>`;
+  const lb=DB.lastBackup||'';
+  const stale=total>0&&(!lb||(Date.now()-new Date(lb+'T00:00:00').getTime())>14*864e5);
+  if(stale)h+=`<p class="warn">${lb?'마지막 백업이 2주가 넘었어요.':'아직 백업한 적이 없어요.'} 폰을 바꾸거나 기록이 지워져도 되살릴 수 있게 백업해 두세요.</p>`;
+  h+=`<div class="kb"><span>저장된 기록 ${total}건 · 마지막 백업 ${lb?lb.slice(5).replace('-','/'):'없음'}</span><button type="button" id="kbak">지금 백업</button></div>`;
+  $('keep').innerHTML=h;$('kbak').onclick=doBackup;
+}
 
 function renderIdx(){
   const s=stats(DB.cur),t=DB.target,el=$('idxcard');
@@ -413,12 +458,12 @@ function renderList(){
   let cur='';sorted.forEach(e=>{
     if(e.date!==cur){cur=e.date;const sum=o.entries.filter(x=>x.date===cur).reduce((a,x)=>a+num(x.amt),0);const d=new Date(cur+'T00:00:00');h+=`<div class="dh"><span>${d.getMonth()+1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일</span><span>${won(sum)}원</span></div>`}
     const t=TMAP[e.type]||TYPES[0];
-    h+=`<div class="item"><button type="button" class="main" data-edit="${e.id}"><span class="tg" style="background:${t.c};color:${t.tc}">${t.n}</span><span class="t">${esc(e.item)}${e.rep?'<small>매달</small>':''}</span><span class="a">${won(num(e.amt))}원</span></button><button type="button" class="del" data-del="${e.id}" aria-label="${esc(e.item)} 기록 삭제">×</button></div>`;
+    h+=`<div class="item"><button type="button" class="main" data-edit="${e.id}"><span class="tg" style="background:${t.c};color:${t.tc}">${t.n}</span><span class="t">${esc(e.item)}${e.rep?'<small>매달</small>':''}${e.fc&&CMAP[e.fc]?`<small>${fmtF(e.fa)}${CMAP[e.fc].n}</small>`:''}</span><span class="a">${won(num(e.amt))}원</span></button><button type="button" class="del" data-del="${e.id}" aria-label="${esc(e.item)} 기록 삭제">×</button></div>`;
   });
   el.innerHTML=h;bindRep(toAdd);bindSel();
 }
 function bindSel(){const b=$('selclear');if(b)b.onclick=()=>{SEL=null;renderCal();renderList()}}
-function bindRep(toAdd){const b=$('pullrep');if(!b)return;b.onclick=()=>{const o=M();const day=pad(1);toAdd.forEach(e=>{const dd=e.date.slice(8);const d=Math.min(Number(dd)||1,lastDay(DB.cur));o.entries.push({id:uid(),ts:Date.now(),date:DB.cur+'-'+pad(d),item:e.item,amt:e.amt,type:e.type,worth:'',rep:true})});save();renderAll();toast(toAdd.length+'건을 불러왔어요')}}
+function bindRep(toAdd){const b=$('pullrep');if(!b)return;b.onclick=()=>{const o=M();const day=pad(1);toAdd.forEach(e=>{const dd=e.date.slice(8);const d=Math.min(Number(dd)||1,lastDay(DB.cur));const n={id:uid(),ts:Date.now(),date:DB.cur+'-'+pad(d),item:e.item,amt:e.amt,type:e.type,worth:'',rep:true};if(e.fc){n.fc=e.fc;n.fa=e.fa;n.fr=e.fr}o.entries.push(n)});save();renderAll();toast(toAdd.length+'건을 불러왔어요')}}
 
 let SEL=null;
 function realToday(){return todayStr()}
@@ -484,27 +529,68 @@ let F={type:'',worth:'',edit:null};
 function moneyInput(el,cb){el.addEventListener('input',()=>{const n=num(el.value);const raw=el.value.replace(/[^0-9]/g,'');el.value=raw?won(n):'';cb(raw===''?'':n)})}
 moneyInput($('income'),v=>{M().income=v;save();renderIdx();drawSoon()});
 moneyInput($('saving'),v=>{M().saving=v;save();renderIdx();drawSoon()});
-moneyInput($('famt'),()=>{});
+$('fcur').innerHTML=CUR.map(c=>`<option value="${c.k}">${c.l}</option>`).join('');
+$('fcur').value=CMAP[DB.lastCur]?DB.lastCur:'KRW';
+function decInput(el){const s=el.value.replace(/[^0-9.]/g,'');if(!s){el.value='';return}const i=s.indexOf('.');const a=i<0?s:s.slice(0,i),b=i<0?null:s.slice(i+1).replace(/\./g,'').slice(0,2);el.value=(a?Number(a).toLocaleString('ko-KR'):'0')+(b!=null?'.'+b:'')}
+function fxKRW(){const c=CMAP[$('fcur').value]||CUR[0];if(c.k==='KRW')return num($('famt').value);const fa=numF($('famt').value),r=numF($('frate').value);return fa&&r?Math.round(fa*r/c.u):0}
+function syncFx(){const c=CMAP[$('fcur').value]||CUR[0],fx=c.k!=='KRW';
+  $('funit').textContent=c.n;$('fxrow').hidden=!fx;$('famt').inputMode=fx?'decimal':'numeric';
+  if(fx){$('fxlab').textContent=fxLabel(c);const k=fxKRW();$('fxeq').textContent=k?'≈ '+won(k)+'원으로 기록돼요':'';}
+}
+$('famt').addEventListener('input',()=>{if($('fcur').value==='KRW'){const raw=$('famt').value.replace(/[^0-9]/g,'');$('famt').value=raw?won(Number(raw)):''}else decInput($('famt'));syncFx()});
+/* 월 평균 환율: 공개 환율 API(frankfurter, 유럽중앙은행 기준)에서 그 달 날짜별 환율을 받아 평균. 지난달은 확정값으로 저장 */
+if(!DB.fx||typeof DB.fx!=='object')DB.fx={};
+const FXP={};
+function monthAvg(code,mon){
+  const key=code+'|'+mon,cm=ym(new Date()),c=DB.fx[key];
+  if(c&&(c.final||c.at===todayStr()))return Promise.resolve(c.r);
+  if(FXP[key])return FXP[key];
+  const end=mon<cm?mon+'-'+pad(lastDay(mon)):'';
+  const q=s=>fetch('https://api.frankfurter.dev/v1/'+s+(s.includes('?')?'&':'?')+'base='+code+'&symbols=KRW').then(r=>{if(!r.ok)throw 0;return r.json()});
+  FXP[key]=q(mon+'-01..'+end).then(d=>{const v=Object.keys(d.rates||{}).filter(k=>k.startsWith(mon)).map(k=>d.rates[k].KRW).filter(Number.isFinite);
+      if(v.length)return v.reduce((a,b)=>a+b,0)/v.length;
+      return q('latest').then(x=>x.rates.KRW)})
+    .then(r=>{r=Math.round(r*100)/100;DB.fx[key]={r,final:mon<cm,at:todayStr()};save();delete FXP[key];return r})
+    .catch(e=>{delete FXP[key];throw e});
+  return FXP[key];
+}
+let FXMAN=false,FXREQ=0;
+function autoRate(){
+  const c=CMAP[$('fcur').value]||CUR[0];if(c.k==='KRW')return;
+  const d=$('fdate').value,mon=(d||todayStr()).slice(0,7),my=++FXREQ;FXMAN=false;
+  $('fxsrc').textContent=Number(mon.slice(5))+'월 평균 불러오는 중…';
+  monthAvg(c.k,mon).then(r=>{if(my!==FXREQ||FXMAN)return;$('frate').value=fmtF(r*c.u);$('fxsrc').textContent=Number(mon.slice(5))+'월 평균 환율';syncFx()})
+    .catch(()=>{if(my!==FXREQ)return;$('fxsrc').textContent='직접 입력';$('fxeq').textContent='';$('fxhelp').innerHTML='환율을 불러오지 못했어요. 대략의 환율을 직접 적어주세요.';if(!$('frate').value&&DB.rates[c.k])$('frate').value=fmtF(DB.rates[c.k]);syncFx()});
+}
+$('frate').addEventListener('input',()=>{FXMAN=true;$('fxsrc').textContent='직접 입력';decInput($('frate'));syncFx()});
+$('fcur').addEventListener('change',()=>{const c=$('fcur').value;DB.lastCur=c;save();$('famt').value='';$('frate').value='';syncFx();autoRate()});
+$('fdate').addEventListener('change',autoRate);
 document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{DB.target=Number(b.dataset.target);save();document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));renderIdx();drawSoon()}));
 $('ftypes').innerHTML=TYPES.map(t=>`<button type="button" class="type" data-t="${t.k}" aria-pressed="false"><b>${t.n}</b><span>${t.g}</span></button>`).join('');
 function syncForm(){document.querySelectorAll('#ftypes .type').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===F.type)));$('tdesc').textContent=F.type?TMAP[F.type].d:'네 가지 중 하나를 골라주세요.';$('fcount').textContent=$('fitem').value.length+'/30'}
 $('ftypes').addEventListener('click',e=>{const b=e.target.closest('.type');if(!b)return;F.type=b.dataset.t;syncForm()});
 $('fitem').addEventListener('input',syncForm);
-function defDate(){const t=todayStr();return t.startsWith(DB.cur)?t:DB.cur+'-01'}
-function resetForm(){F={type:'',worth:'',edit:null};$('fdate').value=defDate();$('fdate').min=DB.cur+'-01';$('fdate').max=DB.cur+'-'+pad(lastDay(DB.cur));$('famt').value='';$('fitem').value='';$('frep').checked=false;$('ferr').textContent='';$('fsubmit').textContent='기록 추가';$('fcancel').hidden=true;syncForm()}
+// 이번 달이면 오늘, 다른 달이면 비워 두고 직접 고르게 (1일로 몰리는 것 방지)
+function defDate(){const t=todayStr();return t.startsWith(DB.cur)?t:''}
+function resetForm(){F={type:'',worth:'',edit:null};$('fdate').value=defDate();$('famt').value='';$('frate').value='';$('fitem').value='';$('frep').checked=false;$('ferr').textContent='';$('fsubmit').textContent='기록 추가';$('fcancel').hidden=true;syncFx();syncForm();autoRate()}
 $('fcancel').addEventListener('click',resetForm);
 $('form').addEventListener('submit',e=>{e.preventDefault();
-  const date=$('fdate').value,item=$('fitem').value.trim(),amt=num($('famt').value);
-  const err=!item?'무엇을 샀는지 적어주세요.':(!amt?'금액을 적어주세요.':(!F.type?'유형을 하나 골라주세요.':(!date||!date.startsWith(DB.cur)?mLabel(DB.cur)+' 날짜를 골라주세요.':'')));
+  const cc=CMAP[$('fcur').value]||CUR[0],fx=cc.k!=='KRW';
+  const date=$('fdate').value,item=$('fitem').value.trim(),fa=fx?numF($('famt').value):0,fr=fx?numF($('frate').value):0,amt=fxKRW();
+  const err=!item?'무엇을 샀는지 적어주세요.':((fx?!fa:!amt)?'금액을 적어주세요.':(fx&&!fr?fxLabel(cc)+' 몇 원인지 환율을 적어주세요.':(!F.type?'유형을 하나 골라주세요.':(!/^\d{4}-\d{2}-\d{2}$/.test(date)?'날짜를 골라주세요.':''))));
   if(err){$('ferr').textContent=err;return}
-  const o=M();
-  if(F.edit){const x=o.entries.find(z=>z.id===F.edit);if(x)Object.assign(x,{date,item,amt,type:F.type,worth:F.worth,rep:$('frep').checked});toast('기록을 고쳤어요')}
-  else{o.entries.push({id:uid(),ts:Date.now(),date,item,amt,type:F.type,worth:F.worth,rep:$('frep').checked});toast('기록했어요')}
-  save();const keepDate=date;resetForm();$('fdate').value=keepDate;renderAll();$('fitem').focus();
+  if(fx)DB.rates[cc.k]=fr;
+  const tm=date.slice(0,7),o=M(tm),other=tm!==DB.cur;
+  const fxv=fx?{fc:cc.k,fa,fr,fauto:!FXMAN}:{};
+  const where=other?' · '+Number(tm.slice(5))+'월 기록으로 저장(‹ › 버튼으로 볼 수 있어요)':'';
+  if(F.edit){const src=M();const i=src.entries.findIndex(z=>z.id===F.edit);if(i>=0){const x=src.entries[i];Object.assign(x,{date,item,amt,type:F.type,worth:F.worth,rep:$('frep').checked});delete x.fc;delete x.fa;delete x.fr;delete x.fauto;Object.assign(x,fxv);if(other){src.entries.splice(i,1);o.entries.push(x)}}toast('기록을 고쳤어요'+where)}
+  else{const n={id:uid(),ts:Date.now(),date,item,amt,type:F.type,worth:F.worth,rep:$('frep').checked};Object.assign(n,fxv);o.entries.push(n);toast((fx?'기록했어요 · '+won(amt)+'원':'기록했어요')+where)}
+  save();const keepDate=date;resetForm();$('fdate').value=keepDate;autoRate();renderAll();$('fitem').focus();
 });
 $('list').addEventListener('click',e=>{
   const d=e.target.closest('[data-del]');if(d){const o=M();const i=o.entries.findIndex(x=>x.id===d.dataset.del);if(i<0)return;const [rm]=o.entries.splice(i,1);save();renderAll();toast('삭제했어요',()=>{M().entries.push(rm);save();renderAll()});return}
-  const ed=e.target.closest('[data-edit]');if(ed){const x=M().entries.find(z=>z.id===ed.dataset.edit);if(!x)return;F={type:x.type,worth:x.worth||'',edit:x.id};$('fdate').value=x.date;$('fitem').value=x.item;$('famt').value=won(num(x.amt));$('frep').checked=!!x.rep;$('fsubmit').textContent='수정 완료';$('fcancel').hidden=false;$('ferr').textContent='';syncForm();$('h-add').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('fitem').focus({preventScroll:true}),350)}
+  const ed=e.target.closest('[data-edit]');if(ed){const x=M().entries.find(z=>z.id===ed.dataset.edit);if(!x)return;F={type:x.type,worth:x.worth||'',edit:x.id};$('fdate').value=x.date;$('fitem').value=x.item;
+    if(x.fc&&CMAP[x.fc]){$('fcur').value=x.fc;$('famt').value=fmtF(x.fa);$('frate').value=fmtF(x.fr);FXREQ++;FXMAN=!x.fauto;$('fxsrc').textContent=x.fauto?Number(x.date.slice(5,7))+'월 평균 환율':'직접 입력'}else{$('fcur').value='KRW';$('famt').value=won(num(x.amt));$('frate').value=''}syncFx();$('frep').checked=!!x.rep;$('fsubmit').textContent='수정 완료';$('fcancel').hidden=false;$('ferr').textContent='';syncForm();$('h-add').scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>$('fitem').focus({preventScroll:true}),350)}
 });
 ['rup','rdown'].forEach(id=>$(id).addEventListener('input',()=>{const o=M();o[{rup:'up',rdown:'down'}[id]]=$(id).value;save();drawSoon()}));
 $('rshow').addEventListener('change',drawSoon);
@@ -515,17 +601,30 @@ $('next').addEventListener('click',()=>{DB.cur=shiftM(DB.cur,1);save();renderMon
 let tt;function toast(msg,undo){$('tmsg').textContent=msg;const u=$('tundo');u.hidden=!undo;u.onclick=()=>{undo&&undo();$('toast').classList.remove('on')};$('toast').classList.add('on');clearTimeout(tt);tt=setTimeout(()=>$('toast').classList.remove('on'),undo?5000:1800)}
 
 /* ---------- 데이터 ---------- */
+// 카카오톡 등 앱 안 브라우저는 파일 다운로드(blob)를 못 받아 '지원하지 않는 파일'이 떠요 → 복사·길게 눌러 저장으로 대신
+function copyText(t){return new Promise(res=>{const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();res(ok)};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>res(true),fb);else fb()})}
 function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
 $('csv').addEventListener('click',()=>{
-  const rows=[['월','날짜','내용','금액','유형','매달']];
-  Object.keys(DB.months).sort().forEach(m=>DB.months[m].entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>rows.push([m,e.date,e.item,num(e.amt),(TMAP[e.type]||{}).n||'',e.rep?'Y':''])));
+  const rows=[['월','날짜','내용','금액(원)','유형','매달','원래 금액','통화','환율']];
+  Object.keys(DB.months).sort().forEach(m=>DB.months[m].entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>rows.push([m,e.date,e.item,num(e.amt),(TMAP[e.type]||{}).n||'',e.rep?'Y':'',e.fc?e.fa:'',e.fc||'',e.fc?e.fr:''])));
   if(rows.length===1){$('derr').textContent='내보낼 기록이 아직 없어요.';return}$('derr').textContent='';
   const q=v=>{v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-  dl(new Blob(['﻿'+rows.map(r=>r.map(q).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}),'MONEY_FREE_LAB_가계부.csv');
+  const txt=rows.map(r=>r.map(q).join(',')).join('\r\n');
+  if(IN_APP){copyText(txt).then(ok=>{$('derr').textContent=ok?'':'이 화면에서는 파일 저장이 안 돼요. 크롬·사파리에서 열면 받을 수 있어요.';if(ok)toast('표 내용을 복사했어요. 메모나 엑셀에 붙여넣어 주세요')});return}
+  dl(new Blob(['﻿'+txt],{type:'text/csv;charset=utf-8'}),'MONEY_FREE_LAB_가계부.csv');
 });
-$('backup').addEventListener('click',()=>{dl(new Blob([JSON.stringify(DB)],{type:'application/json'}),'MONEY_FREE_LAB_가계부_백업_'+todayStr()+'.json');$('derr').textContent=''});
-$('restore').addEventListener('click',()=>$('file').click());
-$('file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||d.v!==1||typeof d.months!=='object')throw 0;DB=d;if(!/^\d{4}-\d{2}$/.test(DB.cur||''))DB.cur=ym(new Date());save();renderMonth();$('derr').textContent='';toast('백업을 불러왔어요')}catch(_){$('derr').textContent='머니프리랩 가계부 백업 파일이 아니에요.'}};r.readAsText(f);e.target.value=''});
+function doBackup(){
+  DB.lastBackup=todayStr();const txt=JSON.stringify(DB);
+  if(IN_APP){copyText(txt).then(ok=>{if(!ok){delete DB.lastBackup;$('derr').textContent='복사가 안 됐어요. 잠시 후 다시 눌러주세요.';return}save();renderKeep();$('derr').textContent='';toast('백업 내용을 복사했어요. 카톡 \'나와의 채팅\'에 붙여넣어 보관하세요')});return}
+  save();dl(new Blob([txt],{type:'application/json'}),'MONEY_FREE_LAB_가계부_백업_'+todayStr()+'.json');$('derr').textContent='';renderKeep();toast('백업 파일을 저장했어요');
+}
+function applyBackup(text){const d=JSON.parse(text);if(!d||d.v!==1||typeof d.months!=='object')throw 0;DB=d;DB.cur=ym(new Date());if(!DB.rates||typeof DB.rates!=='object')DB.rates={};if(!DB.fx||typeof DB.fx!=='object')DB.fx={};save();renderMonth();$('derr').textContent='';$('pastebox').hidden=true;$('pastetxt').value='';toast('백업을 불러왔어요')}
+$('backup').addEventListener('click',doBackup);
+$('restore').addEventListener('click',()=>{if(IN_APP){$('pastebox').hidden=false;$('pastetxt').focus();return}$('file').click()});
+$('pastefile').addEventListener('click',()=>$('file').click());
+$('pasteok').addEventListener('click',()=>{const t=$('pastetxt').value.trim();if(!t){$('derr').textContent='백업 내용을 붙여넣어 주세요.';return}try{applyBackup(t)}catch(_){$('derr').textContent='머니프리랩 가계부 백업 내용이 아니에요. 처음부터 끝까지 다 붙여넣었는지 확인해 주세요.'}});
+$('file').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{applyBackup(r.result)}catch(_){$('derr').textContent='머니프리랩 가계부 백업 파일이 아니에요.'}};r.readAsText(f);e.target.value=''});
 $('clear').addEventListener('click',()=>{const o=M();if(!o.entries.length){toast('지울 기록이 없어요');return}const keep=JSON.parse(JSON.stringify(o));DB.months[DB.cur]={income:o.income,saving:o.saving,entries:[],trig:o.trig,up:o.up,down:o.down};save();renderAll();toast(mLabel(DB.cur)+' 기록을 지웠어요',()=>{DB.months[DB.cur]=keep;save();renderMonth()})});
 
 /* ---------- 결산 이미지 ---------- */
@@ -569,11 +668,17 @@ async function draw(){
   c.fillStyle='#4A4A47';c.font=FT(600,26);nx.forEach((l,i)=>c.fillText(wrapT(c,l,W-P*2-80)[0],P+40,y+222+i*40));
   c.fillStyle='#8C8C85';c.font=FT(600,20);c.fillText('MONEY FREE LAB · 머니프리랩',P,H-56);c.textAlign='right';c.fillText('한 달 가계부',W-P,H-56);c.textAlign='left';
 }
-$('dl').addEventListener('click',async()=>{await draw();$('cv').toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_'+DB.cur+'_결산.png';const file=new File([blob],name,{type:'image/png'});
+$('dl').addEventListener('click',async()=>{await draw();
+  if(IN_APP){$('saveimg').src=$('cv').toDataURL('image/png');$('saveimgbox').hidden=false;$('saveimgbox').scrollIntoView({behavior:'smooth',block:'center'});return}
+  $('cv').toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_'+DB.cur+'_결산.png';const file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'한 달 결산'});return}catch(e){if(e&&e.name==='AbortError')return}}
   dl(blob,name)},'image/png')});
 
 renderMonth();
+(function settleFx(){const cm=ym(new Date()),jobs={};
+  Object.keys(DB.months).forEach(m=>{if(m>=cm)return;(DB.months[m].entries||[]).forEach(e=>{if(e.fc&&e.fauto&&CMAP[e.fc]&&!(DB.fx[e.fc+'|'+m]||{}).final)(jobs[e.fc+'|'+m]=jobs[e.fc+'|'+m]||[]).push(e)})});
+  Object.keys(jobs).forEach(k=>{const [code,m]=k.split('|'),u=CMAP[code].u;monthAvg(code,m).then(r=>{jobs[k].forEach(e=>{e.fr=Math.round(r*u*100)/100;e.amt=Math.round(e.fa*e.fr/u)});save();renderAll()}).catch(()=>{})});
+})();
 })();
 </script>
 </body>
