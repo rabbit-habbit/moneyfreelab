@@ -337,15 +337,13 @@ ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지�
 <p class="label">내 돈 세 칸</p>
 <p class="help" style="margin:2px 0 0">칸마다 목표 금액 · 지금 있는 돈 · 매달 넣을 돈. 세 칸의 '매달'을 더하면 한 달 저축이 돼요.</p>
 <div class="field" style="margin-top:14px"><p class="label">모으는 동안 붙는 이자 <small>예·적금 · 파킹통장</small></p>${optRow('brate',{'0':'이자 없이','2':'연 2%','3':'연 3%','4':'연 4%'})}
-<p class="help">비상금과, 5년 안에 쓸 목표 자금은 원금이 깨지면 안 되는 돈이라 예·적금 이자로 계산해요. (세금 전 단순 계산)</p></div>
+<p class="help">비상금 · 목표 자금은 예·적금 이자로 계산해요. 기간을 크게 줄이는 건 이자보다 <b>매달 넣는 돈</b>이에요. (세금 전 단순 계산)</p></div>
 <div class="bk"><div class="bk-h"><b>비상금</b><span id="bk-emerg-h">생활비 3~6개월치 · 예금·파킹통장</span></div>
 <div class="bk-g">${mini('emergGoal','목표 금액','600')}${mini('emergHave','지금 있는 돈','300')}${mini('emerg','매달 넣을 돈','30','month')}</div><p class="bk-r" id="bk-emerg"></p></div>
 <div class="bk"><div class="bk-h"><b>목표 자금</b><span>몇 년 안에 쓸 돈 · 원금이 깨지면 안 되는 돈</span></div>
 <input id="f-goalWhat" class="txt" data-t="goalWhat" value="${esc(S.goalWhat)}" placeholder="무엇을 위한 돈? 예: 첫 집 계약금" maxlength="20" autocomplete="off">
 <p class="help" style="margin-top:8px">첫 집이 목표라면 목표 금액엔 집값 전체 말고, 대출을 빼고 <b>내 돈으로 필요한 금액</b>(DAY 19 '필요한 내 돈')을 적어요. <span id="needfill"></span></p>
 <div class="bk-g">${mini('goalAmt','목표 금액','5,000')}${mini('goalHave','지금 있는 돈','1,000')}${mini('goal','매달 넣을 돈','50','month')}</div>
-<div style="margin-top:14px"><p class="label" style="font-size:13.5px">5년 넘게 남은 동안 굴리는 수익률</p>${optRow('grate',{'0':'예·적금과 같게','5':'연 5%','7':'연 7%'})}
-<p class="help">DAY 15 평생 돈 지도처럼, 5년 넘게 남은 동안은 장기 투자금처럼 굴리고 <b>마지막 5년은 예·적금으로 지켜요.</b> 투자로 굴리는 동안은 원금이 깨질 수도 있어요.</p></div>
 <p class="bk-r" id="bk-goal"></p></div>
 <div class="bk"><div class="bk-h"><b>장기 투자금</b><span>5년 넘게 안 쓸 돈 · 주식은 이 칸에만</span></div>
 <div class="bk-g" style="grid-template-columns:repeat(2,1fr)">${mini('longHave','지금 있는 돈','500')}${mini('long','매달 넣을 돈','70','month')}</div><p class="bk-r wait">목표 금액 없이 오래 굴리는 칸이에요. 아래 코어 · 위성으로 나눠요.</p></div>
@@ -422,7 +420,7 @@ function renderFound(msg){const el=$('found');if(!el)return;
 function fillMonths(g,h,mo,safeA,invA){const rs=safeA/1200,ri=invA/1200;
  for(let n=1;n<=720;n++){let bal=h;for(let i=1;i<=n;i++){const r=(n-i>=60)?ri:rs;bal=bal*(1+r)+mo}if(bal>=g-1e-6)return n}return 721}
 function bucket(goalAmt,have,mon,isGoal){const g=num(goalAmt),h=num(have),mo=num(mon);if(!g)return null;const rem=Math.max(0,g-h);
- if(!rem)return {done:true,rem:0,months:0};const sa=num(S.brate),ia=isGoal?Math.max(num(S.grate),sa):sa;
+ if(!rem)return {done:true,rem:0,months:0};const sa=num(S.brate),ia=sa;
  const safeM=mo?fillMonths(g,h,mo,sa,sa):0,months=mo?fillMonths(g,h,mo,sa,ia):0;
  const plain=mo?Math.ceil(rem/mo):0;return {done:false,rem,months,mo,plain,safeM,rate:sa,inv:ia>sa&&months>60?ia:0}}
 function bucketTxt(b,k){if(!b)return '';const V=x=>eok(x)+(x<10000?' 원':'');const sub=x=>'<br><span style="font-weight:600;color:var(--muted)">'+x+'</span>';
@@ -433,8 +431,7 @@ function bucketTxt(b,k){if(!b)return '';const V=x=>eok(x)+(x<10000?' 원':'');co
  if(b.inv){t='남은 '+V(b.rem)+' · 매달 '+V(b.mo)+sub('처음 '+ym(b.months-60)+'은 연 '+b.inv+'%로 굴리고, 마지막 5년은 예·적금 연 '+b.rate+'%로 지키면')+'<br>→ <em>약 '+ym(b.months)+' 뒤</em> 다 차요';
   if(b.safeM>b.months)t+=sub('예·적금으로만 모을 때('+ym(b.safeM)+')보다 '+ym(b.safeM-b.months)+' 빨라요')}
  else{t='남은 '+V(b.rem)+' · 매달 '+V(b.mo)+(b.rate?' + 이자 연 '+b.rate+'%':'')+' → <em>약 '+ym(b.months)+' 뒤</em> 다 차요';
-  if(k==='goal'&&b.months<=60)t+=sub('5년 안에 쓸 돈이라 처음부터 예·적금으로 지켜요');
-  else if(b.rate&&b.plain>b.months)t+=sub('이자 덕분에 '+ym(b.plain-b.months)+' 빨라졌어요')}
+  if(b.rate&&b.plain>b.months)t+=sub('이자 덕분에 '+ym(b.plain-b.months)+' 빨라졌어요')}
  if(k==='goal'&&b.months<=720){const b2=bucket(S.goalAmt,S.goalHave,String(b.mo+50),true);if(b2&&b2.months&&b2.months<b.months)t+=sub('매달 50만 원 더 넣으면 → 약 '+ym(b2.months)+' 뒤 ('+ym(b.months-b2.months)+' 빨라요)')}
  if(k==='goal'&&b.months>120&&b.months<=720)t+=sub('10년이 넘으면 모으기만으론 길어요. STEP 5에서 징검다리 · 조건 바꾸기도 같이 봐요');
  return t}
