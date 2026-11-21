@@ -165,6 +165,15 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 .bk-r{margin-top:10px;font-size:13.5px;font-weight:800;line-height:1.5;min-height:1.2em}.bk-r em{font-style:normal;white-space:nowrap;background:var(--accent);padding:0 4px;border-radius:4px}
 .bk-r.done{color:#0B7A1A}.bk-r.wait{color:var(--muted);font-weight:600}
 .bk .txt{margin-top:10px}
+.qz{border-top:1px solid var(--line);padding:14px 0}.qz:first-of-type{border-top:0;padding-top:4px}
+.qz .qq{font-size:15.5px;font-weight:700;line-height:1.55}.qz .qq b{color:var(--muted);font-size:12.5px;margin-right:6px}
+.qz .qo{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.qz .qb{all:unset;box-sizing:border-box;cursor:pointer;min-width:64px;text-align:center;background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:9px 14px;font-weight:800;font-size:15px}
+.qz .qb.ok{background:var(--accent);border-color:var(--ink)}.qz .qb.no{background:#FFE3E0;border-color:#E05A4E;color:#9E2A20}
+.qz .qb[disabled]{cursor:default}
+.qz .qe{margin-top:8px;font-size:13.5px;line-height:1.55;color:var(--muted)}.qz .qe b{color:var(--ink)}
+.qscore{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:6px;padding:14px 16px;border-radius:14px;background:var(--card2);font-weight:800}
+.qscore.done{background:var(--accent)}
 .cert-wrap{margin-top:22px;padding-top:20px;border-top:1px dashed var(--line)}
 .three .field,.two .field{border-bottom:none;padding-bottom:0}
 .two .field+.field,.three .field+.field{margin-top:0}
@@ -208,7 +217,7 @@ const KEY='mfl-day20-roadmap-v1';
 const NOW=new Date(),Y0=NOW.getFullYear();
 const blank=()=>({v:1,name:'',age:'',seedNow:'',living:'',save:'',debtRule:'',
  rate:'',fx:'',cycle:'',econ:'',econEdited:false,
- emerg:'',goal:'',long:'',brate:'3',grate:'5',emergGoal:'',emergHave:'',goalWhat:'',goalAmt:'',goalHave:'',longHave:'',core:'',coreIdx:'',sat:'',rule:'',
+ emerg:'',goal:'',long:'',quiz:{},brate:'3',grate:'5',emergGoal:'',emergHave:'',goalWhat:'',goalAmt:'',goalHave:'',longHave:'',core:'',coreIdx:'',sat:'',rule:'',
  apt1:'',apt1Price:'',apt2:'',apt2Price:'',methods:[],score:'',limit:'',maxPrice:'',need:'',
  route:'',years:'',tl:['','','',''],pledge:'',pledgeEdited:false,before:'',after:'',best:'',mask:false,line:'',lineEdited:false,imported:false});
 let S=load();
@@ -388,6 +397,14 @@ ${mf('need','1순위를 사려면 필요한 내 돈','예: 53,500','DAY 19 계�
 <div class="field" style="margin-top:14px"><label class="label" for="f-best">가장 기억에 남은 날</label><select id="f-best" class="sel" data-t="best"><option value="">골라주세요</option>${[0,1,2,3].map(w=>`<optgroup label="${w+1}주차">${DAYS.slice(w*5,w*5+5).map((t,j)=>{const v='DAY '+String(w*5+j+1).padStart(2,'0');return `<option value="${v}" ${S.best===v?'selected':''}>${v} · ${t}</option>`}).join('')}</optgroup>`).join('')}</select></div></div>
 </section>
 
+<section class="step"><p class="eyebrow">보너스 · 선택</p><h2>4주차 단어 퀴즈</h2>
+<p class="lead">이번 주 단어로 16문제. 누르면 바로 채점돼요. 다 풀면 <b>수료증에 퀴즈 완료 배지</b>가 붙어요.</p>
+<div class="card"><p class="label">PART 1 · 빈칸 채우기</p><div id="qz1"></div></div>
+<div class="card"><p class="label">PART 2 · O / X</p><div id="qz2"></div>
+<div class="qscore" id="qscore"></div>
+<button type="button" class="linkbtn" id="qreset" style="margin-top:10px">퀴즈 다시 풀기</button></div>
+</section>
+
 <section class="step"><p class="eyebrow">인증</p><h2>로드맵 이미지 + 한 줄</h2>
 <p class="lead">4주 완주 인증이에요. 이미지를 저장해서 한 줄과 함께 톡방에 올려주세요.</p>
 <div class="card">
@@ -415,6 +432,22 @@ function renderFound(msg){const el=$('found');if(!el)return;
  else el.innerHTML='';
  if(got){const a=['seedNow','save','apt1Price','limit','maxPrice','need'];a.forEach(k=>{const i=$('f-'+k);if(i){i.value=comma(S[k]);const r=$('r-'+k);if(r)r.textContent=rd(k,S[k])}})}
 }
+
+/* ---------- 4주차 퀴즈 ---------- */
+const QUIZ=[{"t": "b", "q": "내 대출 한도는 LTV · 정부 상한 · DSR 중 가장 ( ) 금액이다.", "o": ["높은", "낮은", "평균"], "a": 1, "e": "셋 중 하나라도 낮으면 거기서 막혀요."}, {"t": "b", "q": "은행이 보는 집값은 매매가와 ( ) 중 낮은 금액이다.", "o": ["공시가격", "분양가", "KB시세"], "a": 2, "e": "시세보다 비싸게 사면, 비싸게 산 만큼은 대출이 안 나와요."}, {"t": "b", "q": "집값의 몇 %까지 빌려줄지 정한 비율을 ( )라고 한다.", "o": ["LTV", "DSR", "PER"], "a": 0, "e": "LTV는 '집이 얼마짜리야?', DSR은 '네가 갚을 수 있어?'예요."}, {"t": "b", "q": "빌린 돈을 지렛대처럼 써서 내 돈의 수익과 손실을 함께 키우는 것을 ( )라고 한다.", "o": ["레버리지", "리밸런싱", "리모델링"], "a": 0, "e": "오를 땐 크게, 내릴 땐 더 크게. 빚은 도구도 되고 덫도 돼요."}, {"t": "b", "q": "서울 3대 업무지구는 강남 · 광화문 · ( )다.", "o": ["잠실", "여의도", "홍대"], "a": 1, "e": "강남(GBD) · 여의도(YBD) · 광화문·종로(CBD). 여기에 판교 · 마곡까지."}, {"t": "b", "q": "청약 가점은 ( )점 만점이다.", "o": ["60", "84", "100"], "a": 1, "e": "무주택 기간 32 + 부양가족 35 + 통장 가입기간 17점."}, {"t": "b", "q": "경매에서 아무도 입찰하지 않아 가격이 내려가는 것을 ( )이라고 한다.", "o": ["낙찰", "명도", "유찰"], "a": 2, "e": "유찰되면 서울은 보통 20%, 경기·지방은 30% 내려가요."}, {"t": "b", "q": "분양권을 살 때 계약금에 얹어 주는 웃돈을 ( )이라고 한다.", "o": ["프리미엄", "중도금", "보증금"], "a": 0, "e": "줄여서 'P(피)'라고도 해요. 웃돈이 마이너스면 '마피'."}, {"t": "b", "q": "사정이 급한 집주인이 시세보다 싸게 내놓은 집을 ( )라고 한다.", "o": ["경매", "청약", "급매"], "a": 2, "e": "'왜 싸요?'에 답이 있어야 진짜 급매예요."}, {"t": "b", "q": "내 연봉으로 1년에 얼마까지 갚을 수 있는지 보는 비율을 ( )이라고 한다.", "o": ["DSR", "LTV", "KB시세"], "a": 0, "e": "LTV는 '집이 얼마짜리야?', DSR은 '네가 갚을 수 있어?'예요."}, {"t": "ox", "q": "집이 없으면(전세·월세로 살면) 집값 흐름은 내 지갑과 상관없다.", "a": "X", "e": "전세금·월세도 집값 흐름을 따라 움직여요. 집이 있든 없든 우리는 이미 집값이라는 게임판 위에 있어요."}, {"t": "ox", "q": "마이너스통장은 쓰지 않으면 DSR 계산에 들어가지 않는다.", "a": "X", "e": "안 써도 한도만큼 대출로 잡혀요."}, {"t": "ox", "q": "급매인지 확인하려면 같은 층대끼리 가격을 비교해야 한다.", "a": "O", "e": "저층·구축 탑층은 원래 싸서, 다른 층과 비교하면 급매로 착각할 수 있어요."}, {"t": "ox", "q": "교통 호재는 개통 전에 이미 가격에 반영되기도 한다.", "a": "O", "e": "이걸 '선반영'이라고 해요. 파주 운정 GTX가 그랬어요."}, {"t": "ox", "q": "세대수가 많은 단지일수록 실거래가 자주 찍혀 값이 잘 보인다.", "a": "O", "e": "거래가 많아 값이 보이고, 팔 때 살 사람도 있어요."}, {"t": "ox", "q": "경매는 낙찰받기 전에 집 안을 미리 둘러보고 살 수 있다.", "a": "X", "e": "경매는 집 안을 미리 못 보고 사요. 그래서 주변 확인이 중요해요."}];
+function quizDone(){return QUIZ.every((_,i)=>S.quiz&&S.quiz[i]!=null)}
+function quizScore(){return QUIZ.reduce((n,q,i)=>n+((S.quiz||{})[i]===(q.t==='ox'?q.a:q.a)?1:0),0)}
+function renderQuiz(){
+ const one=(q,i)=>{const ans=(S.quiz||{})[i];const has=ans!=null;const opts=q.t==='ox'?['O','X']:q.o.map((_,k)=>k);
+  const lab=v=>q.t==='ox'?v:q.o[v];const right=q.a;
+  const btn=v=>{let c='qb';if(has){if(v===right)c+=' ok';else if(v===ans)c+=' no'}return `<button type="button" class="${c}" data-q="${i}" data-qv="${v}" ${has?'disabled':''}>${esc(lab(v))}</button>`};
+  const qt=esc(q.q).replace('( )','<span style="display:inline-block;min-width:56px;border-bottom:2px solid var(--ink);text-align:center">'+(has?esc(q.t==='ox'?'':q.o[right]):'&nbsp;')+'</span>');
+  return `<div class="qz"><p class="qq"><b>${String(q.t==='ox'?i-9:i+1).padStart(2,'0')}</b>${qt}</p><div class="qo">${opts.map(btn).join('')}</div>${has?`<p class="qe"><b>${ans===right?'정답!':'아쉬워요.'}</b> ${esc(q.e)}</p>`:''}</div>`};
+ const a=$('qz1'),b=$('qz2');if(!a)return;
+ a.innerHTML=QUIZ.map((q,i)=>q.t==='b'?one(q,i):'').join('');b.innerHTML=QUIZ.map((q,i)=>q.t==='ox'?one(q,i):'').join('');
+ const n=Object.keys(S.quiz||{}).length,sc=$('qscore');const done=quizDone();
+ sc.className='qscore'+(done?' done':'');sc.innerHTML=done?`<span>16문제 중 ${quizScore()}개 정답!</span><span>수료증 배지 ✓</span>`:`<span>${n} / 16 풀었어요</span><span style="font-weight:600;color:var(--muted)">다 풀면 배지가 붙어요</span>`;
+ const r=$('qreset');if(r)r.hidden=!n}
 
 /* ---------- 세 칸 기간 ---------- */
 function fillMonths(g,h,mo,safeA,invA){const rs=safeA/1200,ri=invA/1200;
@@ -447,7 +480,7 @@ function update(){
  const C=calc();
  $('budgetLine').textContent=C.seed?'약 '+eok(C.budgetLine):'STEP 1에 모은 돈을 넣으면 나와요';
  const sc=$('sumchk');if(C.three){const ok=C.sv&&Math.abs(C.three-C.sv)<=1;sc.className='sumchk'+(ok?' ok':'');const f=x=>x.toLocaleString('ko-KR')+'만 원';sc.textContent='세 칸 합계 '+f(C.three)+(C.sv?' · STEP 1에서 적은 월 저축 가능 금액 '+(ok?f(C.sv)+'과 같아요 ✓':f(C.sv)+'보다 '+f(Math.abs(C.three-C.sv))+' '+(C.three>C.sv?'많아요':'적어요')):' · STEP 1에 월 저축 가능 금액을 적으면 비교해 드려요');sc.hidden=false}else sc.hidden=true;
- renderBuckets();
+ renderBuckets();renderQuiz();
  if(!S.econEdited){S.econ=econAuto();const e=$('f-econ');if(e&&document.activeElement!==e)e.value=S.econ}
  renderGap(C);renderRoutes(C);renderTL(C);
  if(!S.pledgeEdited){S.pledge=pledgeAuto(C)}const pe=$('f-pledge');if(pe&&document.activeElement!==pe)pe.value=S.pledge;
@@ -501,6 +534,8 @@ function bind(){
   if(b.id==='ics'){makeIcs();return}
   if(b.id==='dl'){saveImage();return}
   if(b.id==='dl2'){saveCert();return}
+  if(d.q!=null){const i=+d.q,q=QUIZ[i];if((S.quiz||{})[i]!=null)return;S.quiz=Object.assign({},S.quiz||{});S.quiz[i]=q.t==='ox'?d.qv:+d.qv;update();return}
+  if(b.id==='qreset'){S.quiz={};update();return}
   if(b.id==='useneed'){S.goalAmt=String(Math.round(num(S.need)));if(!S.goalWhat)S.goalWhat='첫 집 (대출 빼고 필요한 돈)';const i=$('f-goalAmt');if(i)i.value=comma(S.goalAmt);const w=$('f-goalWhat');if(w)w.value=S.goalWhat;update();return}
   if(b.id==='ext'){openExternal();return}
   if(b.id==='reset'){if(!confirmReset())return;S=blank();S.imported=true;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(_){}render();window.scrollTo({top:0,behavior:'smooth'});toast('처음 상태로 돌렸어요');return}
@@ -608,7 +643,8 @@ function drawCert(){
  const bx=110,bw=(W-220-36)/4;c.textAlign='left';
  wk.forEach(([a,b],i)=>{const x=bx+i*(bw+12);c.fillStyle=i===3?'#14FA32':'#FFFFFF';rr(c,x,770,bw,120,18);c.fill();c.strokeStyle='#0B0B0B';c.lineWidth=2;c.stroke();
   c.textAlign='center';c.fillStyle='#5F5F59';c.font=FT(800,20);c.fillText(a,x+bw/2,812);c.fillStyle='#0B0B0B';c.font=FT(800,24);c.fillText(fit(c,b,bw-16),x+bw/2,856)});
- c.textAlign='center';c.fillStyle='#5F5F59';c.font=FT(700,24);c.fillText('20일 · 매일 미션 · 자산 로드맵 1장',cx,950);
+ c.textAlign='center';c.fillStyle='#5F5F59';c.font=FT(700,24);c.fillText('20일 · 매일 미션 · 자산 로드맵 1장',cx,quizDone()?936:950);
+ if(quizDone()){const t='✓ 4주차 단어 퀴즈 완료';c.font=FT(800,22);const w=c.measureText(t).width+44;c.fillStyle='#14FA32';rr(c,cx-w/2,956,w,42,21);c.fill();c.strokeStyle='#0B0B0B';c.lineWidth=2;c.stroke();c.fillStyle='#0B0B0B';c.fillText(t,cx,984)}
  // 하단
  c.fillStyle='#DDDDD6';c.fillRect(110,1010,W-220,2);
  c.textAlign='left';c.fillStyle='#5F5F59';c.font=FT(600,22);c.fillText('과정',110,1068);c.fillText('기간',110,1110);c.fillText('운영',110,1152);
