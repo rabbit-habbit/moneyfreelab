@@ -288,7 +288,8 @@ function pledgeAuto(C){const yT=yearsTarget(C);const a1=S.apt1||'1순위 단지'
 
 /* ---------- 화면 ---------- */
 const app=$('app');
-const DAYS=["돈은 빚으로 태어난다", "이자 시스템의 함정", "빚은 도구도 되고 덫도 된다", "소비는 감정이다", "1주차 단어 복습 · 가계부", "물가", "기준금리", "환율", "경기순환과 지표", "2주차 경제뉴스 단어장", "주식의 본질", "미국주식 패권지도", "한국주식 패권지도", "주식시장 읽기", "나의 주식 로드맵 v1", "왜 부동산인가", "오를 집의 기준, 입지", "매수 방법 총정리", "대출 용어와 전략", "내 자산 로드맵"];
+const DEP_RATE=3.4,DEP_RATE_AT='2026년 9월 신규 기준';
+const DAYS=["돈은 빚으로 태어난다", "이자 시스템의 함정", "빚은 도구도 되고 덫도 된다", "소비는 감정이다", "1주차 단어 복습 · 가계부", "물가", "기준금리", "환율", "경기순환과 지표", "2주차 경제뉴스 단어장", "주식의 본질", "미국주식 패권지도", "한국주식 패권지도", "주식시장 읽기", "나의 주식 로드맵", "왜 부동산인가", "오를 집의 기준, 입지", "매수 방법 총정리", "대출 용어와 전략", "내 자산 로드맵"];
 const bestTxt=()=>{const m=/(\d+)/.exec(S.best||'');return m?S.best+' '+DAYS[+m[1]-1]:''};
 const MON=['emerg','goal','long','core','sat'];const rd=(k,v)=>num(v)?(MON.includes(k)?'매달 ':'= ')+full(num(v)):'';
 const mf=(id,label,ph,help,small,cls)=>`<div class="field${cls?' '+cls:''}"><label class="label" for="f-${id}">${label}${small?` <small>${small}</small>`:''}</label><div class="money"><input id="f-${id}" class="input" inputmode="numeric" data-n="${id}" value="${esc(comma(S[id]))}" placeholder="${ph}" autocomplete="off"><span>만원</span></div><p class="read" id="r-${id}">${rd(id,S[id])}</p>${help?`<p class="help">${help}</p>`:''}</div>`;
@@ -301,20 +302,20 @@ function shell(){return `
 <p class="hero-mission">DAY 20. 4주를 모아 나의 자산 로드맵</p>
 <p class="hero-copy">20일 동안 한 미션을<br>오늘 한 장으로 모아요.</p>
 <p class="hero-sub">영상 없는 날이에요. 이 페이지만 위에서부터 따라오면 돼요.</p>
-<ul class="meta"><li>약 30분</li><li>1~4주차 미션 결과</li><li>마지막에 로드맵 이미지 저장</li></ul>
+<ul class="meta"><li>1~4주차 미션 결과</li><li>마지막에 로드맵 이미지 저장</li></ul>
 <p class="lead" style="margin-top:18px"><b>시작 전에 꺼내 둘 것</b></p>
 <ul class="check4">
 <li>DAY 01 내 돈 상태 <span>모은 돈 · 월 생활비 · 월 저축</span></li>
 <li>DAY 03 나의 빚 원칙 <span>한 문장</span></li>
 <li>DAY 09 경기 판단 한 줄 <span>지금 사이클 위치</span></li>
-<li>DAY 15 나의 주식 로드맵 v1 <span>결과 이미지</span></li>
+<li>DAY 15 나의 주식 로드맵 <span>결과 이미지</span></li>
 <li>DAY 16~19 내 첫 집 계획표 ①~④ <span>예산선 · 단지 · 청약 · 대출</span></li>
 </ul>
 <div id="found"></div>
 ${IN_APP?`<div class="inapp"><b>📌 DAY 19를 연 브라우저로 열어 주세요</b><p>${IN_KAKAO?'카카오톡':'앱'} 안에서 열면 어제 계산기 숫자를 못 불러올 수 있어요. 이미지 저장도 크롬·사파리가 편해요.</p><button type="button" id="ext">크롬·사파리로 열기</button></div>`:''}
 </section>
 
-<section class="step"><p class="eyebrow">STEP 1 · 1주차</p><h2>지금의 나 <span class="wk">약 3분</span></h2>
+<section class="step"><p class="eyebrow">STEP 1 · 1주차</p><h2>지금의 나 </h2>
 <p class="lead">DAY 01에서 적은 내 돈 상태와 DAY 03 나의 빚 원칙이에요.</p>
 <div class="card">
 ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지금 있는 돈. 집 살 때 쓸 종잣돈이에요.')}
@@ -322,7 +323,7 @@ ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지�
 <div style="margin-top:22px">${tf('debtRule','나의 빚 원칙 한 문장','나는 빚을 ○○할 때만 쓰겠다','DAY 03에서 쓴 문장 그대로 옮겨요.','DAY 03',60)}</div>
 </div></section>
 
-<section class="step"><p class="eyebrow">STEP 2 · 2주차</p><h2>지금 경제 날씨 <span class="wk">약 2분</span></h2>
+<section class="step"><p class="eyebrow">STEP 2 · 2주차</p><h2>지금 경제 날씨 </h2>
 <p class="lead">숫자 말고 방향만 골라요. 2주차에 본 금리·환율·경기가 지금 어느 쪽인지요.</p>
 <div class="card">
 <div class="field"><p class="label">기준금리 <small>DAY 07</small></p>${optRow('rate',ECON.rate)}</div>
@@ -331,13 +332,12 @@ ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지�
 <div style="margin-top:18px"><label class="label" for="f-econ">그래서 내 로드맵에서는 <small>고쳐 써도 돼요</small></label><input id="f-econ" class="txt" data-t="econ" maxlength="70" autocomplete="off"></div></div>
 </div></section>
 
-<section class="step"><p class="eyebrow">STEP 3 · 3주차</p><h2>내 돈 세 칸 + 주식 칸 <span class="wk">약 3분</span></h2>
+<section class="step"><p class="eyebrow">STEP 3 · 3주차</p><h2>내 돈 세 칸 + 주식 칸 </h2>
 <p class="lead">DAY 15 STEP 1 표를 그대로 옮겨요. 목표 금액과 매달 넣을 돈을 적으면 <b>언제 다 차는지</b> 바로 나와요.</p>
 <div class="card">
 <p class="label">내 돈 세 칸</p>
 <p class="help" style="margin:2px 0 0">칸마다 목표 금액 · 지금 있는 돈 · 매달 넣을 돈. 세 칸의 '매달'을 더하면 한 달 저축이 돼요.</p>
-<div class="field" style="margin-top:14px"><p class="label">모으는 동안 붙는 이자 <small>예·적금 · 파킹통장</small></p>${optRow('brate',{'0':'이자 없이','2':'연 2%','3':'연 3%','4':'연 4%'})}
-<p class="help">비상금 · 목표 자금은 예·적금 이자로 계산해요. 기간을 크게 줄이는 건 이자보다 <b>매달 넣는 돈</b>이에요. (세금 전 단순 계산)</p></div>
+<p class="help" style="margin-top:10px">이자는 <b>은행 정기예금 평균금리 연 ${DEP_RATE}%</b>(한국은행, ${DEP_RATE_AT})로 계산해요. 세금 전 단순 계산이라 실제와 조금 달라요. 기간을 크게 줄이는 건 이자보다 <b>매달 넣는 돈</b>이에요.</p>
 <div class="bk"><div class="bk-h"><b>비상금</b><span id="bk-emerg-h">생활비 3~6개월치 · 예금·파킹통장</span></div>
 <div class="bk-g">${mini('emergGoal','목표 금액','600')}${mini('emergHave','지금 있는 돈','300')}${mini('emerg','매달 넣을 돈','30','month')}</div><p class="bk-r" id="bk-emerg"></p></div>
 <div class="bk"><div class="bk-h"><b>목표 자금</b><span>몇 년 안에 쓸 돈 · 원금이 깨지면 안 되는 돈</span></div>
@@ -354,7 +354,7 @@ ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지�
 <div style="margin-top:22px">${tf('rule','내 규칙 하나','지수가 크게 떨어지면, 나는 적립을 계속한다','DAY 15 STEP 4에서 쓴 규칙 중 제일 중요한 하나','DAY 15',70)}</div>
 </div></section>
 
-<section class="step"><p class="eyebrow">STEP 4 · 4주차</p><h2>내 첫 집 계획표 <span class="wk">약 7분</span></h2>
+<section class="step"><p class="eyebrow">STEP 4 · 4주차</p><h2>내 첫 집 계획표 </h2>
 <p class="lead">월요일부터 채운 계획표 ①~④를 한 번에 모아요.</p>
 <div class="card">
 <div class="field"><p class="label">① 예산선 <small>DAY 16 · 종잣돈 × 3</small></p><p class="big" id="budgetLine"></p></div>
@@ -370,14 +370,14 @@ ${mf('need','1순위를 사려면 필요한 내 돈','예: 53,500','DAY 19 계�
 <button type="button" class="linkbtn" id="reimport" style="margin-top:10px">DAY 19 계산기 숫자 다시 불러오기</button></div>
 </div></section>
 
-<section class="step"><p class="eyebrow">STEP 5 · 이어 붙이기</p><h2>목표까지 가는 길 <span class="wk">약 7분</span></h2>
+<section class="step"><p class="eyebrow">STEP 5 · 이어 붙이기</p><h2>목표까지 가는 길 </h2>
 <p class="lead">1순위 단지는 목표로 두고, 거기까지 어떻게 갈지 골라요. 정답은 없어요.</p>
 <div class="card" id="gap"></div>
 <div class="card"><p class="label">나는 이 길로 갈래요</p><div class="routes" id="routes"></div>
 <div class="field" style="margin-top:20px"><label class="label" for="f-years">1순위까지 목표 기간 <small>년</small></label><input id="f-years" class="txt" inputmode="numeric" data-t="years" value="${esc(S.years)}" placeholder="비우면 모아서 가기는 계산된 기간, 나머지는 5년" maxlength="2" autocomplete="off"></div></div>
 </section>
 
-<section class="step"><p class="eyebrow">STEP 6 · 완성</p><h2>내 로드맵 한 장 <span class="wk">약 5분</span></h2>
+<section class="step"><p class="eyebrow">STEP 6 · 완성</p><h2>내 로드맵 한 장 </h2>
 <p class="lead">올해부터 목표까지, 해마다 할 일을 한 줄씩. 추천 문장을 고쳐 써도 돼요.</p>
 <div class="card"><p class="label">타임라인</p><div id="tl"></div>
 <button type="button" class="linkbtn" id="tlfill" style="margin-top:12px">추천 문장으로 다시 채우기</button></div>
@@ -420,7 +420,7 @@ function renderFound(msg){const el=$('found');if(!el)return;
 function fillMonths(g,h,mo,safeA,invA){const rs=safeA/1200,ri=invA/1200;
  for(let n=1;n<=720;n++){let bal=h;for(let i=1;i<=n;i++){const r=(n-i>=60)?ri:rs;bal=bal*(1+r)+mo}if(bal>=g-1e-6)return n}return 721}
 function bucket(goalAmt,have,mon,isGoal){const g=num(goalAmt),h=num(have),mo=num(mon);if(!g)return null;const rem=Math.max(0,g-h);
- if(!rem)return {done:true,rem:0,months:0};const sa=num(S.brate),ia=sa;
+ if(!rem)return {done:true,rem:0,months:0};const sa=DEP_RATE,ia=sa;
  const safeM=mo?fillMonths(g,h,mo,sa,sa):0,months=mo?fillMonths(g,h,mo,sa,ia):0;
  const plain=mo?Math.ceil(rem/mo):0;return {done:false,rem,months,mo,plain,safeM,rate:sa,inv:ia>sa&&months>60?ia:0}}
 function bucketTxt(b,k){if(!b)return '';const V=x=>eok(x)+(x<10000?' 원':'');const sub=x=>'<br><span style="font-weight:600;color:var(--muted)">'+x+'</span>';
