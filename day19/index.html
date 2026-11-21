@@ -305,6 +305,7 @@ function update(){
  const R=calc();
  syncYears();
  renderCeilings(R);renderMoney(R);renderBudget(R);renderPolicy(R);
+ S.out=R.ready?{limit:Math.round(R.limit),maxPrice:R.maxPrice,need:Math.round(R.need),seed:R.seed,price:R.price,low:R.low,monthly:Math.round(R.monthly),pct:Math.round(R.pct),dsrK:pv(1/12,(R.rate+R.stress)/1200,R.years*12),rtName:R.rtName,region:S.region,first:S.first,income:R.income}:null;
  if(!S.lineEdited){S.line=autoLine(R)}
  const ta=$('f-line');if(ta&&document.activeElement!==ta)ta.value=S.line;
  save();drawSoon();
