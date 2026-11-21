@@ -156,6 +156,16 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 .opt[aria-pressed="true"]{background:var(--accent);border-color:var(--ink);color:var(--ink)}
 .opt:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .three{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.bk{border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:12px;background:#FFFFFF}
+.bk-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px}.bk-h b{font-size:16px;font-weight:800}.bk-h span{font-size:12.5px;color:var(--muted)}
+.bk-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.mini label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.mini label i{font-style:normal;font-weight:600;font-size:11px;color:var(--faint)}.mini .input{margin-top:0;min-height:48px;width:100%;min-width:0;font-size:17px;font-weight:800;padding:11px 10px;border-radius:12px;text-align:right}
+.mini.month .input{border-color:var(--ink)}
+.bk-r{margin-top:10px;font-size:13.5px;font-weight:800;line-height:1.5;min-height:1.2em}.bk-r em{font-style:normal;background:var(--accent);padding:0 4px;border-radius:4px}
+.bk-r.done{color:#0B7A1A}.bk-r.wait{color:var(--muted);font-weight:600}
+.bk .txt{margin-top:10px}
+.cert-wrap{margin-top:22px;padding-top:20px;border-top:1px dashed var(--line)}
 .three .field,.two .field{border-bottom:none;padding-bottom:0}
 .two .field+.field,.three .field+.field{margin-top:0}
 .three .money .input{font-size:16px;padding-right:44px}
@@ -198,7 +208,7 @@ const KEY='mfl-day20-roadmap-v1';
 const NOW=new Date(),Y0=NOW.getFullYear();
 const blank=()=>({v:1,name:'',age:'',seedNow:'',living:'',save:'',debtRule:'',
  rate:'',fx:'',cycle:'',econ:'',econEdited:false,
- emerg:'',goal:'',long:'',core:'',coreIdx:'',sat:'',rule:'',
+ emerg:'',goal:'',long:'',emergGoal:'',emergHave:'',goalWhat:'',goalAmt:'',goalHave:'',longHave:'',core:'',coreIdx:'',sat:'',rule:'',
  apt1:'',apt1Price:'',apt2:'',apt2Price:'',methods:[],score:'',limit:'',maxPrice:'',need:'',
  route:'',years:'',tl:['','','',''],pledge:'',pledgeEdited:false,before:'',after:'',best:'',mask:false,line:'',lineEdited:false,imported:false});
 let S=load();
@@ -278,7 +288,11 @@ function pledgeAuto(C){const yT=yearsTarget(C);const a1=S.apt1||'1순위 단지'
 
 /* ---------- 화면 ---------- */
 const app=$('app');
-const mf=(id,label,ph,help,small,cls)=>`<div class="field${cls?' '+cls:''}"><label class="label" for="f-${id}">${label}${small?` <small>${small}</small>`:''}</label><div class="money"><input id="f-${id}" class="input" inputmode="numeric" data-n="${id}" value="${esc(comma(S[id]))}" placeholder="${ph}" autocomplete="off"><span>만원</span></div><p class="read" id="r-${id}">${num(S[id])?'= '+full(num(S[id])):''}</p>${help?`<p class="help">${help}</p>`:''}</div>`;
+const DAYS=["돈은 빚으로 태어난다", "이자 시스템의 함정", "빚은 도구도 되고 덫도 된다", "소비는 감정이다", "1주차 단어 복습 · 가계부", "물가", "기준금리", "환율", "경기순환과 지표", "2주차 경제뉴스 단어장", "주식의 본질", "미국주식 패권지도", "한국주식 패권지도", "주식시장 읽기", "나의 주식 로드맵 v1", "왜 부동산인가", "오를 집의 기준, 입지", "매수 방법 총정리 · 청약", "대출 용어와 전략", "내 자산 로드맵"];
+const bestTxt=()=>{const m=/(\d+)/.exec(S.best||'');return m?S.best+' '+DAYS[+m[1]-1]:''};
+const MON=['emerg','goal','long','core','sat'];const rd=(k,v)=>num(v)?(MON.includes(k)?'매달 ':'= ')+full(num(v)):'';
+const mf=(id,label,ph,help,small,cls)=>`<div class="field${cls?' '+cls:''}"><label class="label" for="f-${id}">${label}${small?` <small>${small}</small>`:''}</label><div class="money"><input id="f-${id}" class="input" inputmode="numeric" data-n="${id}" value="${esc(comma(S[id]))}" placeholder="${ph}" autocomplete="off"><span>만원</span></div><p class="read" id="r-${id}">${rd(id,S[id])}</p>${help?`<p class="help">${help}</p>`:''}</div>`;
+const mini=(id,label,ph,cls)=>`<div class="mini${cls?' '+cls:''}"><label for="f-${id}">${label} <i>만원</i></label><input id="f-${id}" class="input" inputmode="numeric" data-n="${id}" value="${esc(comma(S[id]))}" placeholder="${ph}" autocomplete="off"></div>`;
 const tf=(id,label,ph,help,small,max)=>`<div class="field"><label class="label" for="f-${id}">${label}${small?` <small>${small}</small>`:''}</label><input id="f-${id}" class="txt" data-t="${id}" value="${esc(S[id])}" placeholder="${ph}" maxlength="${max||60}" autocomplete="off">${help?`<p class="help">${help}</p>`:''}</div>`;
 const optRow=(key,map)=>`<div class="opts" role="group">${Object.entries(map).map(([k,n])=>`<button type="button" class="opt" data-o="${key}" data-v="${k}" aria-pressed="${S[key]===k}">${n}</button>`).join('')}</div>`;
 function shell(){return `
@@ -318,12 +332,20 @@ ${mf('seedNow','지금 모은 돈','예: 3,000','예금·적금·주식 등 지�
 </div></section>
 
 <section class="step"><p class="eyebrow">STEP 3 · 3주차</p><h2>내 돈 세 칸 + 주식 칸 <span class="wk">약 3분</span></h2>
-<p class="lead">DAY 15 '나의 주식 로드맵 v1' 결과에서 옮겨요. 새로 계산하지 않아도 돼요.</p>
+<p class="lead">DAY 15 STEP 1 표를 그대로 옮겨요. 목표 금액과 매달 넣을 돈을 적으면 <b>언제 다 차는지</b> 바로 나와요.</p>
 <div class="card">
-<p class="label">매달 넣을 돈</p>
-<div class="three" style="margin-top:4px">${mf('emerg','비상금','예: 30')}${mf('goal','목표 자금','예: 50','첫 집 계약금은 이 칸이에요')}${mf('long','장기 투자금','예: 70')}</div>
+<p class="label">내 돈 세 칸</p>
+<p class="help" style="margin:2px 0 0">칸마다 목표 금액 · 지금 있는 돈 · 매달 넣을 돈. 세 칸의 '매달'을 더하면 한 달 저축이 돼요.</p>
+<div class="bk"><div class="bk-h"><b>비상금</b><span id="bk-emerg-h">생활비 3~6개월치 · 예금·파킹통장</span></div>
+<div class="bk-g">${mini('emergGoal','목표 금액','600')}${mini('emergHave','지금 있는 돈','300')}${mini('emerg','매달 넣을 돈','30','month')}</div><p class="bk-r" id="bk-emerg"></p></div>
+<div class="bk"><div class="bk-h"><b>목표 자금</b><span>몇 년 안에 쓸 돈 · 원금이 깨지면 안 되는 돈</span></div>
+<input id="f-goalWhat" class="txt" data-t="goalWhat" value="${esc(S.goalWhat)}" placeholder="무엇을 위한 돈? 예: 첫 집 계약금" maxlength="20" autocomplete="off">
+<div class="bk-g">${mini('goalAmt','목표 금액','5,000')}${mini('goalHave','지금 있는 돈','1,000')}${mini('goal','매달 넣을 돈','50','month')}</div><p class="bk-r" id="bk-goal"></p></div>
+<div class="bk"><div class="bk-h"><b>장기 투자금</b><span>5년 넘게 안 쓸 돈 · 주식은 이 칸에만</span></div>
+<div class="bk-g" style="grid-template-columns:repeat(2,1fr)">${mini('longHave','지금 있는 돈','500')}${mini('long','매달 넣을 돈','70','month')}</div><p class="bk-r wait">목표 금액 없이 오래 굴리는 칸이에요. 아래 코어 · 위성으로 나눠요.</p></div>
 <p class="sumchk" id="sumchk"></p>
-<div class="two" style="margin-top:22px">${mf('core','코어 (지수)','예: 50')}${mf('sat','위성 (기업)','예: 20')}</div>
+<p class="label" style="margin-top:22px">장기 투자금은 이렇게 나눠요</p>
+<div class="two" style="margin-top:4px">${mf('core','코어 (지수)','예: 50')}${mf('sat','위성 (기업)','예: 20')}</div>
 <div style="margin-top:22px">${tf('coreIdx','코어로 살 지수','예: S&P500 · 코스피200','','',40)}</div>
 <div style="margin-top:22px">${tf('rule','내 규칙 하나','지수가 크게 떨어지면, 나는 적립을 계속한다','DAY 15 STEP 4에서 쓴 규칙 중 제일 중요한 하나','DAY 15',70)}</div>
 </div></section>
@@ -359,19 +381,23 @@ ${mf('need','1순위를 사려면 필요한 내 돈','예: 53,500','DAY 19 계�
 <div class="card"><p class="label">20일 돌아보기</p>
 <div style="margin-top:6px">${tf('before','4주 전의 나는','예: 금리가 오르면 왜 집값이 흔들리는지 몰랐다','','',50)}</div>
 <div style="margin-top:14px">${tf('after','지금의 나는','예: 뉴스 한 줄을 내 대출과 연결해서 본다','','',50)}</div>
-<div class="field" style="margin-top:14px"><label class="label" for="f-best">가장 기억에 남은 날</label><select id="f-best" class="sel" data-t="best"><option value="">골라주세요</option>${Array.from({length:20},(_,i)=>`<option ${S.best==='DAY '+String(i+1).padStart(2,'0')?'selected':''}>DAY ${String(i+1).padStart(2,'0')}</option>`).join('')}</select></div></div>
+<div class="field" style="margin-top:14px"><label class="label" for="f-best">가장 기억에 남은 날</label><select id="f-best" class="sel" data-t="best"><option value="">골라주세요</option>${[0,1,2,3].map(w=>`<optgroup label="${w+1}주차">${DAYS.slice(w*5,w*5+5).map((t,j)=>{const v='DAY '+String(w*5+j+1).padStart(2,'0');return `<option value="${v}" ${S.best===v?'selected':''}>${v} · ${t}</option>`}).join('')}</optgroup>`).join('')}</select></div></div>
 </section>
 
 <section class="step"><p class="eyebrow">인증</p><h2>로드맵 이미지 + 한 줄</h2>
 <p class="lead">4주 완주 인증이에요. 이미지를 저장해서 한 줄과 함께 톡방에 올려주세요.</p>
 <div class="card">
-${tf('name','이미지에 들어갈 이름','닉네임도 좋아요','','',12)}
+${tf('name','이미지·수료증에 들어갈 이름','닉네임도 좋아요','','',12)}
 <label class="mask" style="margin-top:14px"><input type="checkbox" data-c="mask" ${S.mask?'checked':''}> 금액은 "○억대"로 가려서 올릴게요</label>
 <div class="field" style="margin-top:18px"><label class="label" for="f-line">인증 한 줄 <small>고쳐 써도 돼요</small></label><textarea id="f-line" class="input" data-t="line" maxlength="220"></textarea>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><button type="button" class="linkbtn" id="relines">자동 문장으로 되돌리기</button><button type="button" class="chip" id="copy">한 줄 복사</button></div></div>
 <div class="preview"><canvas id="cv" width="1080" height="1920" aria-label="자산 로드맵 이미지 미리보기"></canvas><p>1080px 너비 PNG · 사진 앱에 저장하거나 톡방에 바로 올려요.</p></div>
 <div class="acts"><button type="button" class="btn primary" id="dl">로드맵 이미지 저장 ↓</button><button type="button" class="btn outline" id="ics">📅 1년 뒤 로드맵 점검일 캘린더에 넣기</button></div>
 <div class="saveimg" id="saveimgbox" hidden><img id="saveimg" alt="저장용 로드맵 이미지"><p>이미지를 길게 눌러 저장해 주세요</p></div>
+<div class="cert-wrap"><p class="label">수료증</p><p class="help" style="margin-top:2px">위에 적은 이름으로 만들어져요. 20일 완주 기념으로 저장해 두세요.</p>
+<div class="preview"><canvas id="cv2" width="1080" height="1350" aria-label="수료증 미리보기"></canvas></div>
+<div class="acts"><button type="button" class="btn primary" id="dl2">수료증 저장 ↓</button></div>
+<div class="saveimg" id="saveimgbox2" hidden><img id="saveimg2" alt="저장용 수료증 이미지"><p>이미지를 길게 눌러 저장해 주세요</p></div></div>
 </div>
 <div class="closing"><h3>4주, 20일 완주했어요.<br><span>이제 내 숫자로 움직일 차례예요.</span></h3><p>로드맵은 한 번 쓰고 끝내는 게 아니라 1년에 한 번 다시 꺼내 보는 거예요. 연봉이 오르거나, 금리가 바뀌거나, 마음에 드는 단지가 바뀌면 그때 숫자만 다시 넣으면 돼요.</p></div>
 <p class="note" style="margin-top:20px"><button type="button" class="linkbtn" id="reset">처음부터 다시 하기 (입력 내용 삭제)</button></p>
@@ -383,14 +409,28 @@ function renderFound(msg){const el=$('found');if(!el)return;
  if(got&&got.length)el.innerHTML=`<div class="found"><b>✓ 지난 미션 숫자를 불러왔어요</b>${got.join(' · ')} → 아래 칸에 미리 채워 뒀어요. 다르면 고쳐 주세요.</div>`;
  else if(got)el.innerHTML=`<div class="found none"><b>불러올 숫자가 없어요</b>DAY 19 계산기를 다른 기기·브라우저에서 했다면 결과 이미지를 보고 옮겨 적으면 돼요.</div>`;
  else el.innerHTML='';
- if(got){const a=['seedNow','save','apt1Price','limit','maxPrice','need'];a.forEach(k=>{const i=$('f-'+k);if(i){i.value=comma(S[k]);const r=$('r-'+k);if(r)r.textContent=num(S[k])?'= '+full(num(S[k])):''}})}
+ if(got){const a=['seedNow','save','apt1Price','limit','maxPrice','need'];a.forEach(k=>{const i=$('f-'+k);if(i){i.value=comma(S[k]);const r=$('r-'+k);if(r)r.textContent=rd(k,S[k])}})}
 }
+
+/* ---------- 세 칸 기간 ---------- */
+function bucket(goalAmt,have,mon){const g=num(goalAmt),h=num(have),mo=num(mon);if(!g)return null;const rem=Math.max(0,g-h);
+ if(!rem)return {done:true,rem:0,months:0};return {done:false,rem,months:mo?Math.ceil(rem/mo):0,mo}}
+function bucketTxt(b){if(!b)return '';const V=x=>eok(x)+(x<10000?' 원':'');
+ if(b.done)return '✓ 목표 금액 다 찼어요. 매달 몫은 다른 칸으로 옮겨요';
+ if(!b.months)return '남은 돈 '+V(b.rem)+' · 매달 넣을 돈을 적으면 기간이 나와요';
+ return '남은 '+V(b.rem)+' ÷ 매달 '+V(b.mo)+' → <em>약 '+ym(b.months)+' 뒤</em> 다 차요'}
+function renderBuckets(){
+ const h=$('bk-emerg-h');if(h){const lv=num(S.living);h.textContent=lv?'생활비 '+comma(S.living)+'만 × 3~6개월 = '+eok(lv*3)+'~'+eok(lv*6)+' 원':'생활비 3~6개월치 · 예금·파킹통장'}
+ [['emerg',bucket(S.emergGoal,S.emergHave,S.emerg)],['goal',bucket(S.goalAmt,S.goalHave,S.goal)]].forEach(([k,b])=>{const el=$('bk-'+k);if(!el)return;
+  el.className='bk-r'+(b?(b.done?' done':(b.months?'':' wait')):' wait');
+  el.innerHTML=b?bucketTxt(b):'목표 금액을 적으면 언제 다 차는지 나와요'})}
 
 /* ---------- 결과 갱신 ---------- */
 function update(){
  const C=calc();
  $('budgetLine').textContent=C.seed?'약 '+eok(C.budgetLine):'STEP 1에 모은 돈을 넣으면 나와요';
  const sc=$('sumchk');if(C.three){const ok=C.sv&&Math.abs(C.three-C.sv)<=1;sc.className='sumchk'+(ok?' ok':'');sc.textContent='세 칸 합계 '+C.three.toLocaleString('ko-KR')+'만 원'+(C.sv?(ok?' = 월 저축 가능 금액 ✓':' · 월 저축 가능 금액 '+C.sv.toLocaleString('ko-KR')+'만 원과 '+(C.three>C.sv?'더 많아요':'달라요')):'');sc.hidden=false}else sc.hidden=true;
+ renderBuckets();
  if(!S.econEdited){S.econ=econAuto();const e=$('f-econ');if(e&&document.activeElement!==e)e.value=S.econ}
  renderGap(C);renderRoutes(C);renderTL(C);
  if(!S.pledgeEdited){S.pledge=pledgeAuto(C)}const pe=$('f-pledge');if(pe&&document.activeElement!==pe)pe.value=S.pledge;
@@ -428,7 +468,7 @@ function autoLine(C){
 /* ---------- 이벤트 ---------- */
 function bind(){
  app.addEventListener('input',e=>{const d=e.target.dataset||{};
-  if(d.n){const raw=e.target.value.replace(/[^0-9]/g,'').slice(0,7);S[d.n]=raw;const pos=e.target.value.length-e.target.selectionStart;e.target.value=comma(raw);try{const p=Math.max(0,e.target.value.length-pos);e.target.setSelectionRange(p,p)}catch(_){}const r=$('r-'+d.n);if(r)r.textContent=num(raw)?'= '+full(num(raw)):'';update();return}
+  if(d.n){const raw=e.target.value.replace(/[^0-9]/g,'').slice(0,7);S[d.n]=raw;const pos=e.target.value.length-e.target.selectionStart;e.target.value=comma(raw);try{const p=Math.max(0,e.target.value.length-pos);e.target.setSelectionRange(p,p)}catch(_){}const r=$('r-'+d.n);if(r)r.textContent=rd(d.n,raw);update();return}
   if(d.t){const k=d.t;S[k]=k==='years'?e.target.value.replace(/[^0-9]/g,''):e.target.value;if(k==='years')e.target.value=S.years;if(k==='econ')S.econEdited=true;if(k==='pledge')S.pledgeEdited=true;if(k==='line'){S.lineEdited=true;save();drawSoon();return}update();return}
   if(d.tl!=null){S.tl[Number(d.tl)]=e.target.value;save();drawSoon();return}
  });
@@ -443,6 +483,7 @@ function bind(){
   if(b.id==='copy'){const ok=await copyText(S.line||'');toast(ok?'한 줄을 복사했어요':'복사가 안 되면 길게 눌러 복사해 주세요');return}
   if(b.id==='ics'){makeIcs();return}
   if(b.id==='dl'){saveImage();return}
+  if(b.id==='dl2'){saveCert();return}
   if(b.id==='ext'){openExternal();return}
   if(b.id==='reset'){if(!confirmReset())return;S=blank();S.imported=true;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(_){}render();window.scrollTo({top:0,behavior:'smooth'});toast('처음 상태로 돌렸어요');return}
  });
@@ -492,12 +533,15 @@ async function draw(){
  const cw=(IW-72)/3;cells.forEach(([k,v],i)=>{const x=P+36+i*cw;small(k,x,y+96);c.fillStyle='#0B0B0B';c.font=FT(800,i===2?26:36);c.fillText(fit(c,v,cw-16),x,y+136)});
  y+=170;
  // 02 내 돈 세 칸
- const th=C.three||0;card(P,y,IW,174);lab('02 매달 내 돈 세 칸',P+36,y+54);
+ const th=C.three||0;const hasG=th&&(bucket(S.emergGoal,S.emergHave,S.emerg)||bucket(S.goalAmt,S.goalHave,S.goal));const h2=hasG?218:174;card(P,y,IW,h2);lab('02 매달 내 돈 세 칸',P+36,y+54);
  if(th){const parts=[['비상금',num(S.emerg),'#0B0B0B','#FFFFFF'],['목표 자금',num(S.goal),'#14FA32','#0B0B0B'],['장기 투자',num(S.long),'#CBCBC4','#0B0B0B']];let x=P+36;const bw2=IW-72;
   parts.forEach(([n,v,bg,fg])=>{if(!v)return;const w=bw2*v/th;c.fillStyle=bg;rr(c,x,y+78,Math.max(w-6,4),56,14);c.fill();c.fillStyle=fg;c.font=FT(800,22);if(w>140)c.fillText(fit(c,n+' '+(m?'':v.toLocaleString('ko-KR')+'만'),w-28),x+14,y+114);x+=w});
-  small((num(S.core)?'코어 '+(m?band(num(S.core)):comma(S.core)+'만')+(S.coreIdx?' '+S.coreIdx:''):'')+(num(S.sat)?' · 위성 '+(m?band(num(S.sat)):comma(S.sat)+'만'):''),P+36,y+160)}
+  const gl=[['비상금',bucket(S.emergGoal,S.emergHave,S.emerg),'',S.emergGoal],['목표 자금',bucket(S.goalAmt,S.goalHave,S.goal),S.goalWhat,S.goalAmt]].filter(x=>x[1]).map(([n,b,w,g])=>(w||n)+' '+V(num(g))+(b.done?' 완성':b.months?' · '+ym(b.months)+' 뒤':''));
+  if(gl.length){c.fillStyle='#111111';c.font=FT(700,22);c.fillText(fit(c,gl.join('   /   '),IW-72),P+36,y+164)}
+  const yc=gl.length?y+198:y+160;
+  small((num(S.core)?'코어 '+(m?band(num(S.core)):comma(S.core)+'만')+(S.coreIdx?' '+S.coreIdx:''):'')+(num(S.sat)?' · 위성 '+(m?band(num(S.sat)):comma(S.sat)+'만'):''),P+36,yc)}
  else small('STEP 3을 채우면 나와요',P+36,y+120,'#8C8C85');
- y+=194;
+ y+=h2+20;
  // 03 내 첫 집
  card(P,y,IW,220,true);lab('03 내 첫 집',P+36,y+54);
  c.fillStyle='#5F5F59';c.font=FT(600,22);c.textAlign='right';c.fillText(fit(c,S.methods.map(k=>METHODS.find(x=>x.k===k).n).join(' · ')+(S.score?' · 가점 '+S.score:''),520),W-P-36,y+52);c.textAlign='left';
@@ -520,9 +564,48 @@ async function draw(){
  card(P,y,IW,ph,true);lab('06 다짐 한 줄',P+36,y+54);c.fillStyle='#0B0B0B';c.font=FT(800,38);pls.forEach((l,i)=>c.fillText(l,P+36,y+108+i*50));
  y+=ph+20;
  // 07 돌아보기
- if(S.before||S.after){card(P,y,IW,150);lab('07 20일 돌아보기'+(S.best?' · 기억에 남은 날 '+S.best:''),P+36,y+54);c.font=FT(600,24);c.fillStyle='#5F5F59';c.fillText(fit(c,'4주 전 '+(S.before||'—'),IW-72),P+36,y+96);c.fillStyle='#111111';c.font=FT(700,24);c.fillText(fit(c,'지금 '+(S.after||'—'),IW-72),P+36,y+132);y+=170}
+ if(S.before||S.after){card(P,y,IW,150);lab('07 20일 돌아보기',P+36,y+54);if(S.best){const lw=c.measureText('07 20일 돌아보기').width;c.font=FT(700,22);c.fillStyle='#111111';c.fillText(fit(c,'♥ '+bestTxt(),IW-72-lw-40),P+36+lw+30,y+54)}c.font=FT(600,24);c.fillStyle='#5F5F59';c.fillText(fit(c,'4주 전 '+(S.before||'—'),IW-72),P+36,y+96);c.fillStyle='#111111';c.font=FT(700,24);c.fillText(fit(c,'지금 '+(S.after||'—'),IW-72),P+36,y+132);y+=170}
+ drawCert();
  c.fillStyle='#8C8C85';c.font=FT(600,20);c.fillText('4주 · 20일 완주 · 교육용 단순 계산 · 특정 단지·종목 추천 아님',P,H-48);c.textAlign='right';c.fillText('MONEY FREE LAB',W-P,H-48);c.textAlign='left';
 }
+/* ---------- 수료증 ---------- */
+const COHORT={n:'1기',period:'2026. 11. 2 – 11. 27'};
+function drawCert(){
+ const cv=$('cv2');if(!cv)return;const c=cv.getContext('2d');const W=1080,H=1350;
+ const LS=v=>{if('letterSpacing' in c)c.letterSpacing=v};
+ c.fillStyle='#F5F5F0';c.fillRect(0,0,W,H);c.textBaseline='alphabetic';
+ c.strokeStyle='#0B0B0B';c.lineWidth=6;rr(c,40,40,W-80,H-80,30);c.stroke();
+ c.lineWidth=2;rr(c,58,58,W-116,H-116,22);c.stroke();
+ const cx=W/2;c.textAlign='center';
+ LS('2px');c.fillStyle='#111111';c.font=FT(800,26);c.fillText('MONEY FREE LAB',cx,150);
+ c.fillStyle='#5F5F59';c.font=FT(700,22);c.fillText('CERTIFICATE OF COMPLETION',cx,190);LS('-2px');
+ c.font=FT(800,120);const tw=c.measureText('수료증').width;c.fillStyle='#14FA32';c.fillRect(cx-tw/2-10,300,tw+20,40);c.fillStyle='#0B0B0B';c.fillText('수료증',cx,330);
+ LS('-1px');const nm=(S.name||'').trim();
+ c.font=FT(800,64);c.fillStyle=nm?'#0B0B0B':'#B5B5AE';const nt=nm?fit(c,nm,760):'이름을 적어 주세요';c.fillText(nt,cx,470);
+ const nw=c.measureText(nt).width;c.fillStyle='#0B0B0B';c.fillRect(cx-Math.max(nw,300)/2-30,500,Math.max(nw,300)+60,3);
+ c.fillStyle='#111111';c.font=FT(600,30);
+ ['위 사람은 머니프리랩 '+COHORT.n+' 4주 20일 과정을','끝까지 완주하고 나만의 자산 로드맵을','완성했기에 이 증서를 드립니다.'].forEach((l,i)=>c.fillText(l,cx,586+i*48));
+ // 4주
+ const wk=[['WEEK 1','자본주의에 눈뜨기'],['WEEK 2','경제 뉴스 읽기'],['WEEK 3','주식 지도 그리기'],['WEEK 4','내 첫 집 계획']];
+ const bx=110,bw=(W-220-36)/4;c.textAlign='left';
+ wk.forEach(([a,b],i)=>{const x=bx+i*(bw+12);c.fillStyle=i===3?'#14FA32':'#FFFFFF';rr(c,x,770,bw,120,18);c.fill();c.strokeStyle='#0B0B0B';c.lineWidth=2;c.stroke();
+  c.textAlign='center';c.fillStyle='#5F5F59';c.font=FT(800,20);c.fillText(a,x+bw/2,812);c.fillStyle='#0B0B0B';c.font=FT(800,24);c.fillText(fit(c,b,bw-16),x+bw/2,856)});
+ c.textAlign='center';c.fillStyle='#5F5F59';c.font=FT(700,24);c.fillText('20일 · 매일 미션 · 자산 로드맵 1장',cx,950);
+ // 하단
+ c.fillStyle='#DDDDD6';c.fillRect(110,1010,W-220,2);
+ c.textAlign='left';c.fillStyle='#5F5F59';c.font=FT(600,22);c.fillText('과정',110,1068);c.fillText('기간',110,1110);c.fillText('운영',110,1152);
+ c.fillStyle='#111111';c.font=FT(800,24);c.fillText('머니프리랩 '+COHORT.n+' · 처음 배우는 자본주의 경제',190,1068);c.fillText(COHORT.period,190,1110);c.fillText('래빗해빛 × 채린의쓰임',190,1152);
+ // 도장
+ const sx=W-220,sy=1105;c.save();c.translate(sx,sy);c.rotate(-0.18);
+ c.fillStyle='#14FA32';c.beginPath();c.arc(0,0,100,0,Math.PI*2);c.fill();c.strokeStyle='#0B0B0B';c.lineWidth=4;c.beginPath();c.arc(0,0,100,0,Math.PI*2);c.stroke();c.lineWidth=2;c.beginPath();c.arc(0,0,86,0,Math.PI*2);c.stroke();
+ LS('0px');c.textAlign='center';c.fillStyle='#0B0B0B';c.font=FT(800,15);c.fillText('MONEY FREE LAB',0,-28);c.font=FT(800,48);c.fillText(COHORT.n,0,20);c.font=FT(800,13);c.fillText('20 DAYS COMPLETE',0,44);c.restore();LS('-1px');
+ c.textAlign='center';c.fillStyle='#8C8C85';c.font=FT(600,18);c.fillText('© MONEY FREE LAB | 머니프리랩',cx,H-80);c.textAlign='left';
+}
+async function saveCert(){await draw();const cv=$('cv2');
+ if(IN_APP){$('saveimg2').src=cv.toDataURL('image/png');$('saveimgbox2').hidden=false;$('saveimgbox2').scrollIntoView({behavior:'smooth',block:'center'});return}
+ cv.toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_'+COHORT.n+'_수료증.png';const file=new File([blob],name,{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(UA)){try{await navigator.share({files:[file],title:'머니프리랩 수료증'});return}catch(e){if(e&&e.name==='AbortError')return}}
+  dl(blob,name)},'image/png')}
 async function saveImage(){await draw();const cv=$('cv');
  if(IN_APP){$('saveimg').src=cv.toDataURL('image/png');$('saveimgbox').hidden=false;$('saveimgbox').scrollIntoView({behavior:'smooth',block:'center'});return}
  cv.toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_DAY20_자산로드맵.png';const file=new File([blob],name,{type:'image/png'});
