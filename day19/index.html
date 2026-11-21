@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F5F5F0">
+<meta name="description" content="머니프리랩 DAY 19 대출 한도 계산기 — LTV · 정부 상한 · DSR 중 가장 낮은 천장으로 내 대출 한도와 진짜 예산을 계산해요.">
+<title>MONEY FREE LAB · DAY 19 대출 한도 계산기</title>
+<style>
+@font-face{font-family:"Pretendard Variable";src:url("PretendardVariable.woff2") format("woff2");font-weight:45 920;font-display:swap}
+:root{
+  --bg:#F5F5F0;--card:#FFFFFF;--card2:#F5F5F0;--accent:#14FA32;--ink:#0B0B0B;
+  --fg:#111111;--muted:#5F5F59;--line:#DDDDD6;--faint:#8C8C85;--bar:#CBCBC4;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.6;letter-spacing:-0.035em;word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+button,input,textarea,select{font:inherit;letter-spacing:inherit;color:inherit}
+h1,h2,h3,p{margin:0}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.wrap{width:100%;max-width:680px;margin:0 auto;padding-inline:20px}
+.topbar{border-bottom:1px solid var(--line)}
+.topbar .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:16px}
+.brand{font-weight:800;font-size:15px;letter-spacing:-0.02em;display:flex;align-items:center;gap:8px}.brand::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 1.5px var(--ink)}
+.day{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0}
+.hero{padding-block:44px 8px}
+.hero-title{font-size:clamp(38px,11vw,68px);font-weight:800;letter-spacing:-0.06em;line-height:.98}
+.mk{background:linear-gradient(transparent 58%,var(--accent) 58%,var(--accent) 92%,transparent 92%);padding:0 .04em}
+.hero-mission{margin-top:16px;font-size:15px;font-weight:800;color:var(--muted)}
+.hero-copy{margin-top:10px;font-size:clamp(19px,5vw,24px);font-weight:800;line-height:1.4;letter-spacing:-0.045em}
+.hero-sub{margin-top:8px;color:var(--muted);font-size:15px}
+.meta{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.meta li{font-size:13px;font-weight:600;color:var(--muted);background:#FFFFFF;border:1px solid var(--line);border-radius:999px;padding:5px 12px;letter-spacing:-0.01em}
+.inapp{margin-top:16px;background:#FFFFFF;border:1.5px solid var(--ink);border-radius:16px;padding:14px 16px;font-size:14px;line-height:1.55}
+.inapp b{display:block;font-size:15px}
+.inapp p{margin-top:6px;font-weight:600}
+.inapp button{all:unset;cursor:pointer;margin-top:10px;display:inline-block;background:var(--ink);color:var(--accent);border-radius:10px;padding:8px 12px;font-weight:800;font-size:13px}
+
+section.step{padding-top:36px}
+.eyebrow{display:inline-block;font-size:13px;font-weight:800;color:var(--ink);background:var(--accent);border-radius:999px;padding:3px 11px;letter-spacing:0}
+.step h2{margin-top:8px;font-size:24px;font-weight:800;letter-spacing:-0.045em;line-height:1.35}
+.lead{margin-top:6px;color:var(--muted);font-size:15px}
+.howto{margin-top:12px;font-size:14px;color:var(--muted);line-height:1.6}
+.howto b{color:var(--fg)}
+.fill{all:unset;cursor:pointer;font-weight:800;color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:3px;text-underline-offset:3px}
+.card{background:var(--card);border:1px solid #E6E6E0;border-radius:20px;padding:20px;margin-top:14px}
+.field+.field{margin-top:26px}
+.field{border-bottom:1px solid #EFEFEA;padding-bottom:22px}
+.field:last-child{border-bottom:none;padding-bottom:0}
+.label{font-size:15px;font-weight:800;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.label small{font-weight:600;color:var(--muted);font-size:12px}
+.input{margin-top:10px;width:100%;background:var(--card2);border:1.5px solid #E2E2DC;border-radius:14px;padding:14px 14px;font-size:18px;font-weight:700;outline:none;transition:border-color .15s;min-height:54px}
+.input:focus{border-color:var(--ink)}
+.input::placeholder{color:#A3A39C;font-weight:500}
+.money{position:relative}.money .input{padding-right:52px;text-align:right}
+.money span{position:absolute;right:14px;bottom:16px;color:var(--muted);font-weight:700;font-size:15px}
+.read{margin-top:6px;text-align:right;font-size:14px;font-weight:800;min-height:1.4em;font-variant-numeric:tabular-nums}
+.help{margin-top:8px;font-size:13px;color:var(--muted)}
+.regions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.region{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid var(--line);border-radius:14px;padding:12px 11px;display:flex;flex-direction:column;gap:4px;min-height:84px}
+.region b{font-size:16px;font-weight:800;line-height:1.3}
+.region span{font-size:12px;color:var(--muted);font-weight:600;line-height:1.45}
+.region[aria-pressed="true"]{background:var(--accent);border-color:var(--ink);color:var(--ink)}
+.region[aria-pressed="true"] span{color:var(--ink)}
+.region:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.toggle{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.toggle input{width:26px;height:26px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.toggle span{font-size:16px;font-weight:800;display:flex;flex-direction:column}
+.toggle small{font-size:13px;font-weight:600;color:var(--muted)}
+.more{margin-top:26px;border-top:1px solid #EFEFEA;padding-top:18px}
+.more summary{cursor:pointer;font-weight:800;font-size:14px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two .field{border-bottom:none;padding-bottom:0}
+.chips{display:flex;gap:8px;margin-top:10px}
+.chip{all:unset;box-sizing:border-box;cursor:pointer;background:var(--card2);border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;font-weight:800;font-size:15px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--accent)}
+.chip:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.chip.off{opacity:.45}
+
+.empty{color:var(--muted);font-size:15px;text-align:center;padding:22px 0;font-weight:600}
+.ceil{display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;padding:10px 0}
+.ceil .nm b{display:block;font-size:19px;font-weight:800;letter-spacing:-0.04em;line-height:1.25}
+.ceil .nm span{display:block;font-size:12px;color:var(--muted);font-weight:600;line-height:1.4;margin-top:2px}
+.track{position:relative;height:46px;background:#EDEDE7;border-radius:14px;overflow:hidden}
+.track i{position:absolute;left:0;top:0;bottom:0;background:var(--bar);border-radius:14px;display:flex;align-items:center;padding-left:14px;font-style:normal;font-weight:800;font-size:17px;white-space:nowrap;transition:width .3s;min-width:86px}
+.track.low i{background:var(--accent);box-shadow:inset 0 0 0 2px var(--ink)}
+.track .tag{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--ink);color:var(--accent);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.limit{margin-top:18px;border:2.5px solid var(--ink);border-radius:20px;padding:18px 20px}
+.limit .k{font-size:14px;font-weight:800;color:var(--muted)}
+.limit .v{margin-top:4px;font-size:clamp(40px,12vw,56px);font-weight:800;letter-spacing:-0.05em;line-height:1.1}
+.limit .s{margin-top:8px;font-size:14px;font-weight:700;color:var(--muted)}
+.explain{margin-top:14px;background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:14px;color:var(--muted);line-height:1.7}
+.explain b{color:var(--fg)}
+.explain .t{font-weight:800;color:var(--fg);margin-bottom:4px}
+.rows .r{display:flex;justify-content:space-between;gap:10px;font-size:15px;font-weight:700;color:var(--muted);padding:6px 0;font-variant-numeric:tabular-nums}
+.rows .r b{color:var(--fg);font-weight:800}
+.rows .r.sum{border-top:1.5px solid var(--ink);margin-top:6px;padding-top:12px;font-size:17px;color:var(--fg)}
+.gapbar{margin-top:14px;border-radius:16px;padding:16px 18px;background:var(--ink);color:#FFFFFF;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800}
+.gapbar b{color:var(--accent);font-size:24px;letter-spacing:-0.04em;white-space:nowrap}
+.gapbar.ok{background:var(--accent);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink)}.gapbar.ok b{color:var(--ink)}
+.pay{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pay div{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.pay span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.pay b{display:block;font-size:22px;font-weight:800;letter-spacing:-0.04em;margin-top:2px;font-variant-numeric:tabular-nums}
+.budget .k{font-size:14px;font-weight:800;color:var(--muted)}
+.budget .v{margin-top:4px;font-size:clamp(34px,10vw,48px);font-weight:800;letter-spacing:-0.05em;line-height:1.15}
+.budget .s{margin-top:10px;font-size:15px;font-weight:700;color:var(--muted)}
+.budget .s b{color:var(--fg)}
+.tips{margin-top:16px;border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:14px;color:var(--muted);line-height:1.8}
+.tips .t{font-weight:800;color:var(--fg)}
+.pol{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:12px 0;border-bottom:1px solid #EFEFEA}
+.pol:last-of-type{border-bottom:none}
+.pol b{font-size:16px;font-weight:800}
+.pol .d{grid-column:1/-1;font-size:13px;color:var(--muted);font-weight:600}
+.pill{display:inline-block;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+.pill.yes{background:var(--accent);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.pill.no{background:#EDEDE7;color:var(--muted)}
+.mask{display:flex;gap:10px;align-items:center;margin-top:4px;font-size:14px;font-weight:700;color:var(--muted);cursor:pointer}
+.mask input{width:20px;height:20px;accent-color:var(--accent)}
+textarea.input{min-height:120px;resize:vertical;font-size:15px;font-weight:600;line-height:1.6;text-align:left}
+.linkbtn{all:unset;cursor:pointer;font-size:13px;font-weight:800;color:var(--muted);text-decoration:underline}
+.btn{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;border-radius:16px;padding:16px 18px;font-weight:800;font-size:16px;display:block;width:100%}
+.btn.primary{background:var(--ink);color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.actions{margin-top:14px}
+.preview{margin-top:16px}
+.preview canvas{width:100%;height:auto;display:block;border-radius:14px;border:1px solid var(--line)}
+.preview p{margin-top:6px;font-size:12px;color:var(--faint);text-align:center}
+.saveimg{margin-top:14px;text-align:center}
+.saveimg img{width:100%;border-radius:14px;display:block;border:1.5px solid var(--ink)}
+.saveimg p{margin-top:8px;font-size:14px;font-weight:800}
+.note{font-size:13px;color:var(--faint);text-align:center}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:var(--fg);color:#FFFFFF;border-radius:14px;padding:12px 16px;font-weight:800;font-size:14px;transition:transform .25s;z-index:20;max-width:calc(100% - 32px)}
+.toast.on{transform:translateX(-50%) translateY(0);visibility:visible}
+.toast:not(.on){visibility:hidden;transition:transform .25s,visibility 0s .25s}
+footer{border-top:1px solid var(--line);margin-top:40px}
+footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-height:1.7}
+[hidden]{display:none!important}
+@media (max-width:420px){.regions{grid-template-columns:1fr}.region{min-height:0}.ceil{grid-template-columns:96px 1fr}.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="wrap"><span class="brand">MONEY FREE LAB</span><span class="day">DAY 19 / 대출 한도 계산기</span></div></header>
+<main class="wrap" id="app"></main>
+<p class="toast" id="toast" role="status" aria-live="polite"></p>
+<footer><div class="wrap">© MONEY FREE LAB | 머니프리랩 제작<br>교육용 단순 계산이라 실제 은행 심사와 다를 수 있어요. 집을 살 땐 계약 전에 은행 상담을 꼭 먼저 받으세요.<br>입력한 숫자는 서버로 보내지 않고 이 기기에만 저장되며, 30일이 지나면 자동으로 지워져요.</div></footer>
+
+<script>
+(function(){
+/* ---------- 기준 숫자 (2026년 11월 확인) ---------- */
+const RULE={
+ asOf:'2026년 11월 기준',
+ rateDefault:4.88,           // 예금은행 주담대 평균(신규취급, 2026년 9월, 한국은행)
+ rateSource:'주담대 평균 4.88% (한국은행, 2026년 9월)',
+ dsr:0.40,                   // 은행권 DSR
+ stress:{reg:3.0,metro:3.0,local:0.75},   // 변동형 기준. 지방은 1.5%p × 50%
+ rtypes:[{k:'cyc5',n:'5년 주기형',d:'5년마다 금리가 바뀌어요',f:0.3},{k:'mix5',n:'5년 혼합형',d:'5년 고정, 그 뒤 변동',f:0.6},{k:'var',n:'변동금리',d:'금리가 수시로 바뀌어요',f:1}], // 스트레스 금리 반영 비율
+ ltv:{reg:[0.40,0.70],metro:[0.70,0.70],local:[0.70,0.80]}, // [일반, 생애최초]
+ creditRate:6.5              // 마이너스통장 DSR 계산용 금리(대략)
+};
+const REGIONS=[
+ {k:'reg',n:'규제지역',d:'서울 전역 · 경기 일부(과천·광명·분당·동탄 등)'},
+ {k:'metro',n:'수도권 비규제',d:'규제지역이 아닌 경기·인천'},
+ {k:'local',n:'지방',d:'수도권 밖'}];
+const KEY='mfl-day19-loan-v1',TTL=30*24*3600*1000;
+const blank=()=>({v:1,saved:Date.now(),price:'',region:'reg',first:true,income:'',other:'',mt:'',seed:'',rate:String(RULE.rateDefault),rtype:'cyc5',years:30,net:'',mask:false,line:'',lineEdited:false});
+let S=load();
+function load(){try{const r=JSON.parse(localStorage.getItem(KEY)||'null');if(r&&r.v===1&&Date.now()-r.saved<TTL)return Object.assign(blank(),r)}catch(e){}return blank()}
+function save(){S.saved=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=Number(String(v).replace(/[^0-9.]/g,''));return isFinite(n)?n:0};
+const comma=v=>{const n=Number(String(v).replace(/[^0-9]/g,''));return n?n.toLocaleString('ko-KR'):''};
+const UA=navigator.userAgent||'';
+const IN_KAKAO=/KAKAOTALK/i.test(UA);
+const IN_APP=IN_KAKAO||/NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp/i.test(UA);
+
+/* ---------- 금액 표시 (단위: 만원) ---------- */
+function eok(m){m=Math.round(m);if(Math.abs(m)>=10000){let t=(Math.abs(m)/10000).toFixed(2).replace(/0$/,'').replace(/\.0$/,'');return (m<0?'-':'')+t+'억'}return Math.round(m).toLocaleString('ko-KR')+'만'}
+function eok1(m){m=Math.round(m);if(Math.abs(m)>=10000){return (Math.round(Math.abs(m)/1000)/10).toString()+'억'}return Math.round(m).toLocaleString('ko-KR')+'만 원'}
+function full(m){m=Math.round(Math.abs(m));const e=Math.floor(m/10000),r=m%10000;if(!m)return '0원';return (e?e+'억':'')+(e&&r?' ':'')+(r?r.toLocaleString('ko-KR')+'만':'')+' 원'}
+function band(m){m=Math.abs(m);if(m>=10000)return Math.floor(m/10000)+'억대';if(m>=1000)return Math.floor(m/1000)+'천만 원대';if(m>=100)return Math.floor(m/100)+'백만 원대';return Math.round(m)+'만 원'}
+function bandMonthly(m){if(m>=100)return Math.floor(m/100)+'백만 원대';if(m>=10)return Math.floor(m/10)+'0만 원대';return Math.round(m)+'만 원'}
+function bandPct(p){return Math.floor(p/10)*10+'%대'}
+
+/* ---------- 계산 ---------- */
+function pv(pay,r,n){return r>0?pay*(1-Math.pow(1+r,-n))/r:pay*n}
+function pmt(p,r,n){return r>0?p*r/(1-Math.pow(1+r,-n)):p/n}
+function acqTax(price,first){ // 1주택 유상취득, 85㎡ 이하 가정
+ const e=price/10000;let rate=e<=6?0.01:e<=9?(e*2/3-3)/100:0.03;
+ let tax=price*rate+price*rate*0.1; // 취득세 + 지방교육세
+ if(first&&price<=120000)tax-=Math.min(200,price*rate); // 생애최초 감면 최대 200만
+ return Math.max(0,tax)}
+function brokerFee(price){ // 매매 중개보수 상한 + 부가세
+ let f;if(price<5000)f=Math.min(price*0.006,25);else if(price<20000)f=Math.min(price*0.005,80);else if(price<90000)f=price*0.004;else if(price<120000)f=price*0.005;else if(price<150000)f=price*0.006;else f=price*0.007;
+ return f*1.1}
+const NET=[[1500,125],[2400,185],[3000,230],[3600,272],[4000,298],[5000,360],[6000,410],[7000,466],[8000,520],[9000,574],[10000,628],[12000,725],[15000,870],[20000,1100],[30000,1560]];
+function estNet(inc){if(inc<=0)return 0;if(inc<=NET[0][0])return inc/12*0.98;for(let i=1;i<NET.length;i++){const[a,x]=NET[i-1],[b,y]=NET[i];if(inc<=b)return x+(y-x)*(inc-a)/(b-a)}return inc/12*0.62}
+function capOf(price,region){return region==='local'?null:(price<=150000?60000:price<=250000?40000:20000)}
+function limits(price,p){
+ const ltv=Math.max(0,price*RULE.ltv[p.region][p.first?1:0]);
+ const cap=capOf(price,p.region);
+ const cands=[{k:'ltv',v:ltv},{k:'dsr',v:p.dsrMax}];if(cap!==null)cands.push({k:'cap',v:cap});
+ let low=cands[0];cands.forEach(c=>{if(c.v<low.v)low=c});
+ return {ltv,cap,dsr:p.dsrMax,limit:Math.max(0,Math.min(low.v,price)),low:low.k}}
+function calc(){
+ const price=num(S.price),income=num(S.income),other=num(S.other),mt=num(S.mt),seed=num(S.seed);
+ const rate=Math.min(Math.max(num(S.rate),0),20),years=S.region==='local'?S.years:30,n=years*12;
+ const RT=RULE.rtypes.find(t=>t.k===S.rtype)||RULE.rtypes[0];
+ const stress=Math.round(RULE.stress[S.region]*RT.f*100)/100;
+ const otherAnnual=other*12+(mt?mt/5+mt*RULE.creditRate/100:0);
+ const room=Math.max(0,income*RULE.dsr-otherAnnual); // 1년에 주담대로 갚을 수 있는 돈
+ const dsrMax=pv(room/12,(rate+stress)/1200,n);
+ const p={region:S.region,first:S.first,dsrMax};
+ const L=limits(price,p);
+ const cost=price?acqTax(price,S.first)+brokerFee(price):0;
+ const need=Math.max(0,price+cost-L.limit);
+ const gap=seed-need;
+ const monthly=L.limit?pmt(L.limit,rate/1200,n):0;
+ const per1=pmt(10000,rate/1200,n); // 1억당 월 상환
+ const net=num(S.net)||estNet(income);
+ const pct=net?monthly/net*100:0;
+ let maxPrice=0;
+ if(income||seed){for(let pr=100;pr<=600000;pr+=100){const l=limits(pr,p).limit;const c=acqTax(pr,S.first)+brokerFee(pr);if(seed+l>=pr+c)maxPrice=pr}}
+ const ready=price>0&&income>0;
+ return {price,income,other,mt,seed,rate,years,stress,rtName:RT.n,otherAnnual,room,ltv:L.ltv,cap:L.cap,dsr:L.dsr,limit:L.limit,low:L.low,cost,need,gap,monthly,per1,net,pct,maxPrice,ready,hasSeed:S.seed!==''};
+}
+const LOWNAME={ltv:'LTV',cap:'정부 상한',dsr:'DSR'};
+
+/* ---------- 화면 ---------- */
+const app=$('app');
+const moneyField=(id,label,ph,help,small)=>`<div class="field"><label class="label" for="f-${id}">${label}${small?` <small>${small}</small>`:''}</label><div class="money"><input id="f-${id}" class="input" inputmode="numeric" data-f="${id}" value="${esc(comma(S[id]))}" placeholder="${ph}" autocomplete="off"><span>만원</span></div><p class="read" id="r-${id}">${readOut(id)}</p>${help?`<p class="help">${help}</p>`:''}</div>`;
+function readOut(id){const v=num(S[id]);return v?'= '+full(v):''}
+function shell(){return `
+<section class="hero">
+<h1 class="hero-title">HOW MUCH<br><span class="mk">CAN I BORROW?</span></h1>
+<p class="hero-mission">DAY 19. 대출 용어와 전략</p>
+<p class="hero-copy">LTV · 정부 상한 · DSR,<br>세 개의 천장 중 가장 낮은 게 내 한도예요.</p>
+<p class="hero-sub">월요일에 잡은 예산선, 오늘은 내 연봉 기준으로도 확인해봐요.</p>
+<ul class="meta"><li>약 15분</li><li>세전 연봉 · 다른 대출 · 종잣돈</li><li>1순위 단지 가격</li><li>마지막에 인증 이미지 저장</li></ul>
+${IN_APP?`<div class="inapp"><b>📌 크롬·사파리로 열면 더 편해요</b><p>${IN_KAKAO?'카카오톡':'앱'} 안에서는 입력한 숫자가 지워지기 쉽고, 이미지 저장도 잘 안 될 수 있어요. 내일 DAY 20 로드맵에서 오늘 숫자를 그대로 불러오려면 같은 브라우저로 열어 주세요.</p><button type="button" id="ext">크롬·사파리로 열기</button></div>`:''}
+</section>
+
+<section class="step" aria-labelledby="h1">
+<p class="eyebrow">STEP 01 · 숫자 넣기</p><h2 id="h1">내 숫자를 넣어요</h2>
+<p class="lead">금액은 모두 <b>만원</b> 단위예요. 8억 5천이면 85000을 넣으면 돼요.</p>
+<p class="howto"><button type="button" class="fill" id="sample">래빗해빛 예시 숫자로 먼저 눌러보기</button> (B단지 8.5억 · 연봉 6천 · 종잣돈 3억)<br><b>설명을 위한 예시일 뿐 매수 추천과 무관해요.</b></p>
+<div class="card">
+${moneyField('price','1순위 단지 가격','예: 85,000','어제까지 고른 1순위 단지 가격을 넣어요. 은행은 매매가와 KB시세(KB국민은행이 매주 조사해 발표하는 시세) 중 낮은 금액으로 LTV를 계산해요. 어느 쪽이 더 낮은지는 지역마다 달라서, KB부동산 앱의 "KB 시세 일반가"와 최근 실거래가를 둘 다 확인하고 낮은 쪽을 넣어요.')}
+<div class="field"><p class="label">그 단지는 어디에 있나요</p>
+<div class="regions" role="group" aria-label="지역">${REGIONS.map(r=>`<button type="button" class="region" data-region="${r.k}" aria-pressed="${S.region===r.k}"><b>${r.n}</b><span>${r.d}</span></button>`).join('')}</div>
+<p class="help">규제지역: 서울 25개 구 + 과천·광명·성남(분당·수정·중원)·하남·수원(영통·장안·팔달)·안양 동안·용인(수지·기흥)·의왕·화성 동탄·구리 (${RULE.asOf})</p>
+<label class="toggle" style="margin-top:18px"><input type="checkbox" data-f="first" ${S.first?'checked':''}><span>생애최초예요<small>집을 처음 사요</small></span></label></div>
+${moneyField('income','세전 연봉','예: 6,000','부부가 같이 대출받을 땐 두 사람 연봉을 더해서 넣어요.')}
+${moneyField('other','지금 갚고 있는 대출, 매달 얼마?','예: 0','신용대출 · 자동차 할부 · 학자금 등 매달 나가는 원금+이자 합계. 없으면 비워두세요.','없으면 비워두기')}
+${moneyField('mt','마이너스통장 한도','예: 0','안 써도 한도 전체를 빌린 걸로 계산해요(5년 나눠 갚는다고 가정).','없으면 비워두기')}
+<div class="field"><p class="label">어떤 금리로 빌릴 건가요</p>
+<div class="regions" role="group" aria-label="금리 종류">${RULE.rtypes.map(t=>`<button type="button" class="region" data-rtype="${t.k}" aria-pressed="${S.rtype===t.k}"><b>${t.n}</b><span>${t.d}</span></button>`).join('')}</div>
+<p class="help">은행은 "금리가 오르면?"을 대비해 금리를 더 얹어서 한도를 계산해요(스트레스 DSR). 3%p를 다 얹는 건 변동금리일 때만이에요. 수도권·규제지역 기준 5년 혼합형은 1.8%p, 5년 주기형은 0.9%p만 얹어요. 잘 모르겠으면 5년 주기형으로 두세요.</p></div>
+${moneyField('seed','지금 모아둔 종잣돈','예: 30,000','예금·적금·주식 등 집 사는 데 바로 쓸 수 있는 돈이에요.')}
+<details class="more"${S.rate!==String(RULE.rateDefault)||S.years!==30||S.net?' open':''}><summary>금리 · 기간 · 실수령 바꾸기 (선택)</summary>
+<div class="two" style="margin-top:14px">
+<div class="field"><label class="label" for="f-rate">대출 금리</label><div class="money"><input id="f-rate" class="input" inputmode="decimal" data-f="rate" value="${esc(S.rate)}"><span>%</span></div><p class="help">기본값: ${RULE.rateSource}</p></div>
+<div class="field"><p class="label">갚는 기간</p><div class="chips" role="group" aria-label="갚는 기간" id="years">${[30,40].map(y=>`<button type="button" class="chip" data-years="${y}" aria-pressed="${S.years===y}">${y}년</button>`).join('')}</div><p class="help">원리금균등상환으로 계산해요. 수도권·규제지역 주담대는 최대 30년이라, 40년은 지방에서만 반영돼요.</p></div>
+</div>
+<div style="margin-top:22px">${moneyField('net','한 달 실수령 월급','자동 계산','비워두면 연봉으로 대략 계산해요.','선택')}</div>
+</details>
+</div>
+</section>
+
+<section class="step" aria-labelledby="h2">
+<p class="eyebrow">STEP 02 · 세 개의 천장</p><h2 id="h2">가장 낮은 천장이 내 한도예요</h2>
+<div class="card" id="ceilings" aria-live="polite"></div>
+<div class="card" id="mymoney" aria-live="polite"></div>
+</section>
+
+<section class="step" aria-labelledby="h3">
+<p class="eyebrow">STEP 03 · 내 진짜 예산</p><h2 id="h3">그럼 내 진짜 예산은?</h2>
+<p class="lead">지금 종잣돈과 내 대출 한도로 살 수 있는 가장 비싼 집이에요. 부족하게 나와도 괜찮아요. 1순위 단지는 목표로 두고, 이 숫자는 "지금 살 수 있는 집"으로 금요일 계획표에 넣어요.</p>
+<div class="card budget" id="budget" aria-live="polite"></div>
+<div class="card" id="policy" aria-live="polite"></div>
+</section>
+
+<section class="step" aria-labelledby="h4">
+<p class="eyebrow">인증</p><h2 id="h4">결과 캡처 + 한 줄</h2>
+<p class="lead">아래 인증 이미지를 저장하고, 한 줄과 함께 톡방에 올려주세요.</p>
+<div class="card">
+<label class="mask"><input type="checkbox" data-f="mask" ${S.mask?'checked':''}> 금액은 "○억대"로 가려서 올릴게요</label>
+<p class="help" style="margin-top:4px">가려도 인증 인정이에요. 대신 계산은 꼭 내 진짜 숫자로 해주세요.</p>
+<div class="field" style="margin-top:18px"><label class="label" for="f-line">인증 한 줄 <small>고쳐 써도 돼요</small></label><textarea id="f-line" class="input" data-f="line" maxlength="200"></textarea>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><button type="button" class="linkbtn" id="relines">자동 문장으로 되돌리기</button><button type="button" class="chip" id="copy">한 줄 복사</button></div></div>
+<div class="preview"><canvas id="cv" width="1080" height="1490" aria-label="대출 한도 인증 이미지 미리보기"></canvas><p>1080px 너비 PNG · 사진 앱에 저장하거나 톡방에 바로 올려요.</p></div>
+<div class="actions"><button type="button" class="btn primary" id="dl">인증 이미지 저장 ↓</button></div>
+<div class="saveimg" id="saveimgbox" hidden><img id="saveimg" alt="저장용 인증 이미지"><p>이미지를 길게 눌러 저장해 주세요</p></div>
+</div>
+<p class="note" style="margin-top:20px"><button type="button" class="linkbtn" id="reset">처음부터 다시 하기 (입력 숫자 삭제)</button></p>
+</section>`}
+
+function render(){app.innerHTML=shell();bind();update()}
+
+/* ---------- 결과 ---------- */
+function update(){
+ const R=calc();
+ syncYears();
+ renderCeilings(R);renderMoney(R);renderBudget(R);renderPolicy(R);
+ if(!S.lineEdited){S.line=autoLine(R)}
+ const ta=$('f-line');if(ta&&document.activeElement!==ta)ta.value=S.line;
+ save();drawSoon();
+}
+function syncYears(){const box=$('years');if(!box)return;box.querySelectorAll('.chip').forEach(b=>{const y=Number(b.dataset.years);b.setAttribute('aria-pressed',String(S.years===y));b.classList.toggle('off',y===40&&S.region!=='local')})}
+function renderCeilings(R){
+ const el=$('ceilings');
+ if(!R.ready){el.innerHTML='<p class="empty">1순위 단지 가격과 세전 연봉을 넣으면<br>세 개의 천장이 나와요.</p>';return}
+ const ltvPct=Math.round(RULE.ltv[S.region][S.first?1:0]*100);
+ const rows=[{k:'ltv',n:'LTV',d:'집값 × '+ltvPct+'%',v:R.ltv}];
+ if(R.cap!==null)rows.push({k:'cap',n:'정부 상한',d:R.price<=150000?'15억 이하 집':R.price<=250000?'15~25억 집':'25억 넘는 집',v:R.cap});
+ rows.push({k:'dsr',n:'DSR',d:'연봉 40% · '+R.rtName+' +'+R.stress+'%p',v:R.dsr});
+ const mx=Math.max(...rows.map(r=>r.v),1);
+ const lowName=LOWNAME[R.low];
+ const why={ltv:'집값 기준으로 은행이 빌려주는 만큼이에요',cap:'정부가 정한 대출 상한이에요',dsr:'내 연봉이 갚을 수 있다고 인정받는 만큼이에요'}[R.low];
+ el.innerHTML=rows.map(r=>`<div class="ceil"><div class="nm"><b>${r.n}</b><span>${r.d}</span></div><div class="track${r.k===R.low?' low':''}"><i style="width:${Math.max(8,r.v/mx*100)}%">${eok(r.v)}</i>${r.k===R.low?'<span class="tag">가장 낮은 천장</span>':''}</div></div>`).join('')
+ +`<div class="limit"><p class="k">내 대출 한도 (가장 낮은 천장: ${lowName})</p><p class="v"><span class="mk">약 ${eok(R.limit)}</span></p><p class="s">${full(R.limit)} · ${why}</p></div>`
+ +`<div class="explain"><p class="t">DSR은 이렇게 계산했어요</p>1년에 갚을 수 있는 돈 = 연봉 ${R.income.toLocaleString('ko-KR')}만 × 40%${R.otherAnnual?` − 다른 대출 ${Math.round(R.otherAnnual).toLocaleString('ko-KR')}만`:''} = <b>${Math.round(R.room).toLocaleString('ko-KR')}만</b><br>(한 달 ${Math.round(R.room/12).toLocaleString('ko-KR')}만 원)<br>은행은 금리 ${R.rate}%에 ${R.stress}%p를 얹은 <b>${(Math.round((R.rate+R.stress)*100)/100)}%</b>로 ${R.years}년 동안 갚는다고 보고 한도를 정해요.${S.rtype!=='cyc5'?'<br>5년 주기형으로 바꿔 보면 덜 얹어서 한도가 늘어나요.':''}</div>`;
+}
+function renderMoney(R){
+ const el=$('mymoney');
+ if(!R.ready){el.hidden=true;return}el.hidden=false;
+ let h=`<p class="label">그 집을 사려면, 내 돈은 얼마나?</p><div class="rows" style="margin-top:10px">
+ <div class="r"><span>1순위 단지 가격</span><b>${eok(R.price)}</b></div>
+ <div class="r"><span>+ 부대비용 (취득세·중개보수)</span><b>${eok(R.cost)}</b></div>
+ <div class="r"><span>− 내 대출 한도</span><b>${eok(R.limit)}</b></div>
+ <div class="r sum"><span>필요한 내 돈</span><b>${eok(R.need)}</b></div></div>`;
+ if(R.hasSeed){h+=R.gap<0?`<div class="gapbar"><span>종잣돈 ${eok(R.seed)}보다</span><b>${eok(-R.gap)} 부족</b></div>`:`<div class="gapbar ok"><span>종잣돈 ${eok(R.seed)}으로</span><b>${eok(R.gap)} 남아요</b></div>`}
+ else h+='<p class="help">종잣돈을 넣으면 얼마나 부족한지 나와요.</p>';
+ const tone=R.pct<=30?'여유 있는 편이에요':R.pct<=40?'빠듯해요. 생활비를 같이 따져봐요':'부담이 커요. 한도까지 다 빌리지 않는 것도 방법이에요';
+ h+=`<div class="pay"><div><span>한도를 다 빌리면 매달</span><b>${Math.round(R.monthly).toLocaleString('ko-KR')}만 원</b></div><div><span>실수령 월급(약 ${Math.round(R.net).toLocaleString('ko-KR')}만)의</span><b>${Math.round(R.pct)}%</b></div></div>
+ <p class="help">${tone}. 실제 금리 ${R.rate}% · ${R.years}년 원리금균등 기준이에요. 이 금리로 ${R.years}년이면 <b>대출 1억당 매달 약 ${Math.round(R.per1)}만 원</b>이에요.</p>`;
+ el.innerHTML=h;
+}
+function renderBudget(R){
+ const el=$('budget');
+ if(!(R.income||R.seed)){el.innerHTML='<p class="empty">연봉과 종잣돈을 넣으면 나와요.</p>';return}
+ let h=`<p class="k">지금 종잣돈 ${eok(R.seed)} + 내 대출 한도로</p><p class="v">약 ${eok(R.maxPrice)}까지의 집</p>`;
+ if(R.price){h+=R.maxPrice<R.price?`<p class="s">지금 숫자로는 1순위 단지(${eok(R.price)})까지 <b>${eok(R.price-R.maxPrice)}</b> 남았어요. 1순위는 목표로 그대로 두세요.</p>`:`<p class="s">1순위 단지(${eok(R.price)})까지 닿아요. 그래도 매달 갚을 돈이 월급의 몇 %인지 꼭 같이 보세요.</p>`}
+ h+=`<div class="tips"><p class="t">1순위는 목표로 두고, 이렇게 해보세요</p>① 2순위 단지 가격으로도 계산해보기<br>② 아래 정책대출 조건에 해당되는지 확인하기<br>③ 차이만큼 몇 년 모으면 되는지 금요일 로드맵에서 같이 계산하기</div>`;
+ el.innerHTML=h;
+}
+function renderPolicy(R){
+ const el=$('policy');
+ if(!R.ready){el.hidden=true;return}el.hidden=false;
+ const inc=R.income,pr=R.price;
+ const did=S.first?inc<=7000:inc<=6000,didOk=did&&pr<=50000;
+ const bog=inc<=7000&&pr<=60000;
+ const row=(n,ok,d)=>`<div class="pol"><b>${n}</b><span class="pill ${ok?'yes':'no'}">${ok?'해당될 수 있어요':'조건 밖'}</span><span class="d">${d}</span></div>`;
+ el.innerHTML=`<p class="label">정책대출, 나도 될까? <small>소득은 부부 합산</small></p>`
+ +row('디딤돌대출',didOk,'소득 6천만 원 이하(생애최초 7천) · 집값 5억 이하 · 한도 2억(생애최초 2.4억) · 금리가 가장 싸요')
+ +row('보금자리론',bog,'소득 7천만 원 이하(신혼 8,500만 또는 한 명 7천) · 집값 6억 이하 · 한도 3.6억(생애최초 4.2억) · DSR 대신 DTI')
+ +`<p class="help">2년 안에 아이를 낳은 가구라면 신생아 특례대출(부부 소득 2억 이하 · 집값 9억 이하)도 확인해보세요. 무주택·순자산 등 조건이 더 있어서, 신청 전엔 주택도시기금·주택금융공사에서 꼭 확인해요.</p>`;
+}
+function autoLine(R){
+ if(!R.ready)return '';
+ const m=S.mask;
+ const a=m?band(R.limit):'약 '+eok1(R.limit);
+ let t=`내 대출 한도 ${a} (가장 낮은 천장: ${LOWNAME[R.low]}).`;
+ t+=` 1순위 단지 ${m?band(R.price):eok1(R.price)}을 사려면 내 돈 ${m?band(R.need):eok1(R.need)} 필요`;
+ if(R.hasSeed)t+=R.gap<0?` → 종잣돈보다 ${m?band(-R.gap):eok1(-R.gap)} 부족.`:` → 종잣돈으로 충분해요.`;else t+='.';
+ t+=` 매달 ${m?bandMonthly(R.monthly):Math.round(R.monthly)+'만 원'}, 월급의 ${m?bandPct(R.pct):Math.round(R.pct)+'%'}.`;
+ if(R.maxPrice)t+=` 내 진짜 예산은 ${m?band(R.maxPrice):'약 '+eok1(R.maxPrice)}.`;
+ return t;
+}
+
+/* ---------- 이벤트 ---------- */
+function bind(){
+ app.addEventListener('input',e=>{const f=e.target.dataset&&e.target.dataset.f;if(!f)return;
+  if(f==='line'){S.line=e.target.value;S.lineEdited=true;save();drawSoon();return}
+  if(f==='first'||f==='mask'){S[f]=e.target.checked;update();return}
+  if(f==='rate'){S.rate=e.target.value.replace(/[^0-9.]/g,'');update();return}
+  const raw=e.target.value.replace(/[^0-9]/g,'').slice(0,7);S[f]=raw;
+  const pos=e.target.value.length-e.target.selectionStart;e.target.value=comma(raw);try{const p=Math.max(0,e.target.value.length-pos);e.target.setSelectionRange(p,p)}catch(_){}
+  const r=$('r-'+f);if(r)r.textContent=readOut(f);update()});
+ app.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.f;if(f==='first'||f==='mask'){S[f]=e.target.checked;update()}});
+ app.addEventListener('click',async e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.region){S.region=b.dataset.region;b.parentElement.querySelectorAll('.region').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.region===S.region)));update();return}
+  if(b.dataset.rtype){S.rtype=b.dataset.rtype;b.parentElement.querySelectorAll('.region').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.rtype===S.rtype)));update();return}
+  if(b.dataset.years){S.years=Number(b.dataset.years);update();if(S.years===40&&S.region!=='local')toast('수도권·규제지역은 30년으로 계산돼요');return}
+  if(b.id==='sample'){Object.assign(S,{price:'85000',region:'reg',first:true,income:'6000',other:'',mt:'',seed:'30000',rtype:'cyc5',rate:String(RULE.rateDefault),years:30,net:'',lineEdited:false});render();$('ceilings').scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(b.id==='relines'){S.lineEdited=false;update();toast('자동 문장으로 되돌렸어요');return}
+  if(b.id==='copy'){const ok=await copyText(S.line||'');toast(ok?'한 줄을 복사했어요':'복사가 안 되면 길게 눌러 복사해 주세요');return}
+  if(b.id==='reset'){if(!confirmReset())return;S=blank();try{localStorage.removeItem(KEY)}catch(_){}render();window.scrollTo({top:0,behavior:'smooth'});toast('처음 상태로 돌렸어요');return}
+  if(b.id==='ext'){openExternal();return}
+  if(b.id==='dl'){saveImage();return}
+ });
+}
+let resetArm=0;function confirmReset(){const now=Date.now();if(now-resetArm<4000){resetArm=0;return true}resetArm=now;toast('한 번 더 누르면 입력한 숫자가 모두 지워져요');return false}
+function openExternal(){const u=location.href.split('#')[0];if(IN_KAKAO){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(u);return}copyText(u).then(()=>toast('주소를 복사했어요. 크롬·사파리 주소창에 붙여넣어 주세요'))}
+let tt;function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2000)}
+function copyText(t){return new Promise(res=>{const fb=()=>{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);let ok=false;try{ok=document.execCommand('copy')}catch(e){}ta.remove();res(ok)};
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(()=>res(true),fb);else fb()})}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000)}
+
+/* ---------- 인증 이미지 ---------- */
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+const FT=(w,s)=>`${w} ${s}px "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif`;
+let dt;function drawSoon(){clearTimeout(dt);dt=setTimeout(draw,150)}
+async function draw(){
+ const cv=$('cv');if(!cv)return;const c=cv.getContext('2d');try{await Promise.all([document.fonts.load(FT(800,40)),document.fonts.load(FT(600,30))])}catch(e){}
+ const R=calc(),m=S.mask,W=1080,H=1490,P=72;
+ const LS=v=>{if('letterSpacing' in c)c.letterSpacing=v};
+ const V=(x,kind)=>m?(kind==='mo'?bandMonthly(x):kind==='pct'?bandPct(x):band(x)):(kind==='mo'?Math.round(x).toLocaleString('ko-KR')+'만 원':kind==='pct'?Math.round(x)+'%':eok(x));
+ c.fillStyle='#F5F5F0';c.fillRect(0,0,W,H);c.textBaseline='alphabetic';LS('-1px');
+ const lab=(tx,x,yy)=>{c.font=FT(800,22);const w=c.measureText(tx).width;c.fillStyle='#14FA32';rr(c,x-12,yy-28,w+24,38,19);c.fill();c.fillStyle='#0B0B0B';c.fillText(tx,x,yy)};
+ const card=(x,yy,w,h,strong)=>{c.fillStyle='#FFFFFF';rr(c,x,yy,w,h,28);c.fill();c.strokeStyle=strong?'#0B0B0B':'#E2E2DC';c.lineWidth=strong?3:2;c.stroke()};
+ c.fillStyle='#111111';c.font=FT(800,26);c.fillText('MONEY FREE LAB',P,92);
+ c.fillStyle='#5F5F59';c.font=FT(600,24);c.textAlign='right';c.fillText('DAY 19 / MISSION',W-P,92);c.textAlign='left';
+ c.fillStyle='#DDDDD6';c.fillRect(P,118,W-P*2,2);
+ LS('-4px');c.fillStyle='#111111';c.font=FT(800,76);c.fillText('MY LOAN',P,222);{const rw=c.measureText('LIMIT').width;c.fillStyle='#14FA32';c.fillRect(P-4,272,rw+12,36)}c.fillStyle='#111111';c.fillText('LIMIT',P,302);LS('-1px');
+ c.fillStyle='#5F5F59';c.font=FT(600,24);c.fillText('DAY 19. 대출 용어와 전략 · 내 첫 집 계획표 ④',P,352);
+ let y=396;
+ if(!R.ready){card(P,y,W-P*2,200);c.fillStyle='#8C8C85';c.font=FT(700,30);c.fillText('숫자를 넣으면 여기에 결과가 나와요',P+40,y+112);return}
+ // 01 세 개의 천장
+ const rows=[['LTV',R.ltv,'ltv']];if(R.cap!==null)rows.push(['정부 상한',R.cap,'cap']);rows.push(['DSR',R.dsr,'dsr']);
+ const ch=96+rows.length*64+20;card(P,y,W-P*2,ch);lab('01 세 개의 천장',P+40,y+58);
+ c.fillStyle='#5F5F59';c.font=FT(600,22);c.textAlign='right';c.fillText(REGIONS.find(r=>r.k===S.region).n+(S.first?' · 생애최초':'')+' · '+R.rtName,W-P-40,y+56);c.textAlign='left';
+ const mx=Math.max(...rows.map(r=>r[1]),1),bx=P+190,bw=W-P*2-230;
+ rows.forEach((r,i)=>{const yy=y+96+i*64;c.fillStyle='#111111';c.font=FT(800,28);c.fillText(r[0],P+40,yy+30);
+  c.fillStyle='#EDEDE6';rr(c,bx,yy,bw,44,14);c.fill();const w=Math.max(120,bw*r[1]/mx);const low=r[2]===R.low;
+  c.fillStyle=low?'#14FA32':'#CBCBC4';rr(c,bx,yy,w,44,14);c.fill();if(low){c.strokeStyle='#0B0B0B';c.lineWidth=3;c.stroke()}
+  c.fillStyle='#0B0B0B';c.font=FT(800,26);c.fillText(V(r[1])+(low?'  ← 가장 낮은 천장':''),bx+20,yy+31)});
+ y+=ch+20;
+ // 02 · 03
+ const hw=(W-P*2-20)/2,h2=200;card(P,y,hw,h2,true);lab('02 내 대출 한도',P+40,y+58);
+ LS('-3px');c.font=FT(800,64);const lt=(m?'':'약 ')+V(R.limit);const lw=c.measureText(lt).width;c.fillStyle='#14FA32';c.fillRect(P+36,y+126,lw+8,22);c.fillStyle='#0B0B0B';c.fillText(lt,P+40,y+144);LS('-1px');
+ c.fillStyle='#5F5F59';c.font=FT(600,22);c.fillText('가장 낮은 천장: '+LOWNAME[R.low],P+40,y+180);
+ card(P+hw+20,y,hw,h2);lab('03 필요한 내 돈',P+hw+60,y+58);
+ LS('-3px');c.fillStyle='#0B0B0B';c.font=FT(800,64);c.fillText(V(R.need),P+hw+60,y+144);LS('-1px');
+ c.fillStyle='#5F5F59';c.font=FT(600,22);c.fillText('집값 '+(m?band(R.price):eok(R.price))+' + 부대비용 − 대출',P+hw+60,y+180);
+ y+=h2+20;
+ // 부족 바
+ c.fillStyle='#111111';rr(c,P,y,W-P*2,120,28);c.fill();
+ c.fillStyle='#FFFFFF';c.font=FT(700,30);c.fillText(R.hasSeed?'종잣돈 '+(m?band(R.seed):eok(R.seed))+(R.gap<0?'보다':'으로'):'종잣돈을 넣으면 나와요',P+40,y+72);
+ if(R.hasSeed){c.fillStyle='#14FA32';c.font=FT(800,50);c.textAlign='right';c.fillText(R.gap<0?V(-R.gap)+' 부족':V(R.gap)+' 남아요',W-P-40,y+78);c.textAlign='left'}
+ y+=140;
+ // 04 매달
+ card(P,y,W-P*2,150);lab('04 매달 갚을 돈',P+40,y+58);
+ c.fillStyle='#0B0B0B';c.font=FT(800,46);c.fillText(V(R.monthly,'mo'),P+40,y+118);c.textAlign='right';c.fillText('월급의 '+V(R.pct,'pct'),W-P-40,y+118);c.textAlign='left';
+ y+=170;
+ // 05 내 진짜 예산
+ card(P,y,W-P*2,132,true);lab('05 내 진짜 예산',P+40,y+58);
+ c.fillStyle='#0B0B0B';c.font=FT(800,44);c.fillText((m?band(R.maxPrice):'약 '+eok(R.maxPrice))+'까지의 집',P+40,y+112);
+ c.fillStyle='#8C8C85';c.font=FT(600,20);c.fillText('교육용 단순 계산 · '+RULE.asOf+' · 금리 '+R.rate+'% '+R.years+'년',P,H-56);c.textAlign='right';c.fillText('MONEY FREE LAB',W-P,H-56);c.textAlign='left';
+}
+async function saveImage(){await draw();const cv=$('cv');
+ if(IN_APP){$('saveimg').src=cv.toDataURL('image/png');$('saveimgbox').hidden=false;$('saveimgbox').scrollIntoView({behavior:'smooth',block:'center'});return}
+ cv.toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_DAY19_대출한도.png';const file=new File([blob],name,{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(UA)){try{await navigator.share({files:[file],title:'DAY 19 대출 한도'});return}catch(e){if(e&&e.name==='AbortError')return}}
+  dl(blob,name)},'image/png')}
+
+render();
+})();
+</script>
+</body>
+</html>
