@@ -114,6 +114,7 @@ section.step{padding-top:36px}
 .pol:last-of-type{border-bottom:none}
 .pol b{font-size:16px;font-weight:800}
 .pol .d{grid-column:1/-1;font-size:13px;color:var(--muted);font-weight:600}
+.pol .why{grid-column:1/-1;font-size:13.5px;font-weight:800;color:var(--ink)}
 .pill{display:inline-block;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;white-space:nowrap}
 .pill.yes{background:var(--accent);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
 .pill.no{background:#EDEDE7;color:var(--muted)}
@@ -352,12 +353,18 @@ function renderPolicy(R){
  const el=$('policy');
  if(!R.ready){el.hidden=true;return}el.hidden=false;
  const inc=R.income,pr=R.price;
- const did=S.first?inc<=7000:inc<=6000,didOk=did&&pr<=50000;
- const bog=inc<=7000&&pr<=60000;
- const row=(n,ok,d)=>`<div class="pol"><b>${n}</b><span class="pill ${ok?'yes':'no'}">${ok?'해당될 수 있어요':'조건 밖'}</span><span class="d">${d}</span></div>`;
+ const man=v=>v>=10000?eok(v):v.toLocaleString('ko-KR')+'만 원';
+ const chk=(iLim,pLim)=>{const iOk=inc<=iLim,pOk=!pr||pr<=pLim;return {ok:iOk&&pOk,iOk,pOk,iLim,pLim}};
+ const didR=chk(S.first?7000:6000,50000),bogR=chk(7000,60000);
+ const why=r=>{if(r.ok)return '';const w=[];
+  if(!r.iOk)w.push('연소득 '+man(inc)+' → 기준 '+man(r.iLim)+'보다 많아요');
+  if(!r.pOk)w.push((r.iOk?'소득은 OK · ':'')+'집값 '+eok(pr)+' → 기준 '+eok(r.pLim)+'보다 비싸요'+(r.iOk?'. '+eok(r.pLim)+' 이하 집이면 해당될 수 있어요':''));
+  return w.join('<br>')};
+ const pillT=r=>r.ok?'해당될 수 있어요':(!r.pOk&&r.iOk)?'집값이 기준 밖':(!r.iOk&&r.pOk)?'소득이 기준 밖':'조건 밖';
+ const row=(n,r,d)=>`<div class="pol"><b>${n}</b><span class="pill ${r.ok?'yes':'no'}">${pillT(r)}</span>${r.ok?'':`<span class="why">${why(r)}</span>`}<span class="d">${d}</span></div>`;
  el.innerHTML=`<p class="label">정책대출, 나도 될까? <small>소득은 부부 합산</small></p>`
- +row('디딤돌대출',didOk,'소득 6천만 원 이하(생애최초 7천) · 집값 5억 이하 · 한도 2억(생애최초 2.4억) · 금리가 가장 싸요')
- +row('보금자리론',bog,'소득 7천만 원 이하(신혼 8,500만 또는 한 명 7천) · 집값 6억 이하 · 한도 3.6억(생애최초 4.2억) · DSR 대신 DTI')
+ +row('디딤돌대출',didR,'소득 6천만 원 이하(생애최초 7천) · 집값 5억 이하 · 한도 2억(생애최초 2.4억) · 금리가 가장 싸요')
+ +row('보금자리론',bogR,'소득 7천만 원 이하(신혼 8,500만 또는 한 명 7천) · 집값 6억 이하 · 한도 3.6억(생애최초 4.2억) · DSR 대신 DTI')
  +`<p class="help">2년 안에 아이를 낳은 가구라면 신생아 특례대출(부부 소득 2억 이하 · 집값 9억 이하)도 확인해보세요. 무주택·순자산 등 조건이 더 있어서, 신청 전엔 주택도시기금·주택금융공사에서 꼭 확인해요.</p>`;
 }
 function autoLine(R){
