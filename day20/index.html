@@ -209,7 +209,7 @@ footer .wrap{padding-block:22px 40px;font-size:13px;color:var(--faint);line-heig
 <header class="topbar"><div class="wrap"><span class="brand">MONEY FREE LAB</span><span class="day">DAY 20 / 나의 자산 로드맵</span></div></header>
 <main class="wrap" id="app"></main>
 <p class="toast" id="toast" role="status" aria-live="polite"></p>
-<footer><div class="wrap">© MONEY FREE LAB | 머니프리랩 제작<br>교육용 단순 계산이에요. 특정 종목·단지·상품을 권하지 않아요. 집을 살 땐 계약 전에 은행 상담을 꼭 먼저 받으세요.<br>입력한 내용은 서버로 보내지 않고 이 기기에만 저장돼요.</div></footer>
+<footer><div class="wrap">© MONEY FREE LAB | 머니프리랩 제작<br>교육용 단순 계산이에요. 특정 종목·단지·상품을 권하지 않아요. 집을 살 땐 계약 전에 은행 상담을 꼭 먼저 받으세요.</div></footer>
 
 <script>
 (function(){
@@ -442,7 +442,7 @@ function renderQuiz(){
   const lab=v=>q.t==='ox'?v:q.o[v];const right=q.a;
   const btn=v=>{let c='qb';if(has){if(v===right)c+=' ok';else if(v===ans)c+=' no'}return `<button type="button" class="${c}" data-q="${i}" data-qv="${v}" ${has?'disabled':''}>${esc(lab(v))}</button>`};
   const qt=esc(q.q).replace('( )','<span style="display:inline-block;min-width:56px;border-bottom:2px solid var(--ink);text-align:center">'+(has?esc(q.t==='ox'?'':q.o[right]):'&nbsp;')+'</span>');
-  return `<div class="qz"><p class="qq"><b>${String(q.t==='ox'?i-9:i+1).padStart(2,'0')}</b>${qt}</p><div class="qo">${opts.map(btn).join('')}</div>${has?`<p class="qe"><b>${ans===right?'정답!':'아쉬워요.'}</b> ${esc(q.e)}</p>`:''}</div>`};
+  return `<div class="qz"><p class="qq"><b>${String(q.t==='ox'?i-9:i+1).padStart(2,'0')}</b>${qt}</p><div class="qo">${opts.map(btn).join('')}</div>${has?`<p class="qe">${ans===right?'<b>정답!</b> ':''}${esc(q.e)}</p>`:''}</div>`};
  const a=$('qz1'),b=$('qz2');if(!a)return;
  a.innerHTML=QUIZ.map((q,i)=>q.t==='b'?one(q,i):'').join('');b.innerHTML=QUIZ.map((q,i)=>q.t==='ox'?one(q,i):'').join('');
  const n=Object.keys(S.quiz||{}).length,sc=$('qscore');const done=quizDone();
@@ -660,7 +660,20 @@ async function saveCert(){await draw();const cv=$('cv2');
  cv.toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_'+COHORT.n+'_수료증.png';const file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(UA)){try{await navigator.share({files:[file],title:'머니프리랩 수료증'});return}catch(e){if(e&&e.name==='AbortError')return}}
   dl(blob,name)},'image/png')}
-async function saveImage(){await draw();const cv=$('cv');
+/* ---------- 돌아보기 데이터 (구글 폼) ---------- */
+const FORM_URL='https://docs.google.com/forms/d/e/1FAIpQLScSHwkiNgOScyLMUUUGGIkcAU8VN2tXtwLqnLcnf-5PuyGBOQ/formResponse';
+const FORM_IDS={cohort:579645189,anon:2019985329,best:1293310160,before:148718215,after:602428030,seed:1033148921,save:1990319011,p1:1821502844,p2:129520253,methods:116557290};
+function anonId(){let id='';try{id=localStorage.getItem('mfl-anon-id')||''}catch(e){}
+ if(!id){id=Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);try{localStorage.setItem('mfl-anon-id',id)}catch(e){}}return id}
+function sendSurvey(){try{
+ const v={cohort:COHORT.n,anon:anonId(),best:bestTxt(),before:(S.before||'').trim(),after:(S.after||'').trim(),seed:num(S.seedNow)||'',save:num(S.save)||'',p1:num(S.apt1Price)||'',p2:num(S.apt2Price)||'',
+  methods:(S.methods||[]).map(k=>(METHODS.find(m=>m.k===k)||{}).n).filter(Boolean).join(', ')};
+ if(!v.best&&!v.before&&!v.after)return;
+ const sig=JSON.stringify(v);if(S.sentSig===sig)return;
+ const fd=new URLSearchParams();Object.keys(FORM_IDS).forEach(k=>fd.append('entry.'+FORM_IDS[k],String(v[k]??'')));
+ fetch(FORM_URL,{method:'POST',mode:'no-cors',body:fd}).then(()=>{S.sentSig=sig;save()}).catch(()=>{});
+}catch(e){}}
+async function saveImage(){sendSurvey();await draw();const cv=$('cv');
  if(IN_APP){$('saveimg').src=cv.toDataURL('image/png');$('saveimgbox').hidden=false;$('saveimgbox').scrollIntoView({behavior:'smooth',block:'center'});return}
  cv.toBlob(async blob=>{if(!blob)return;const name='MONEY_FREE_LAB_DAY20_자산로드맵.png';const file=new File([blob],name,{type:'image/png'});
   if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(UA)){try{await navigator.share({files:[file],title:'나의 자산 로드맵'});return}catch(e){if(e&&e.name==='AbortError')return}}
