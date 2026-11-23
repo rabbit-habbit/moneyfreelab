@@ -241,7 +241,7 @@ function shell(){return `
 <p class="hero-mission">DAY 19. 대출 용어와 전략</p>
 <p class="hero-copy">LTV · 정부 상한 · DSR,<br>세 개의 천장 중 가장 낮은 게 내 한도예요.</p>
 <p class="hero-sub">월요일에 잡은 예산선, 오늘은 내 연봉 기준으로도 확인해봐요!</p>
-<ul class="meta"><li>세전 연봉 · 다른 대출 · 종잣돈</li><li>1순위 단지 가격</li><li>마지막에 인증 이미지 저장</li></ul>
+<ul class="meta"><li>세전 연봉 · 다른 대출 · 종잣돈</li><li>1순위 단지 가격</li><li>마지막에 인증 이미지 1장 저장</li></ul>
 ${IN_APP?`<div class="inapp"><b>📌 크롬·사파리로 열면 더 편해요</b><p>${IN_KAKAO?'카카오톡':'앱'} 안에서는 입력한 숫자가 지워지기 쉽고, 이미지 저장도 잘 안 될 수 있어요. 내일 DAY 20 로드맵에서 오늘 숫자를 그대로 불러오려면 같은 브라우저로 열어 주세요.</p><button type="button" id="ext">크롬·사파리로 열기</button></div>`:''}
 </section>
 
@@ -285,13 +285,11 @@ ${moneyField('seed','지금 모아둔 종잣돈','예: 30,000','예금·적금·
 </section>
 
 <section class="step" aria-labelledby="h4">
-<p class="eyebrow">인증</p><h2 id="h4">결과 캡처 + 한 줄</h2>
-<p class="lead">아래 인증 이미지를 저장하고, 한 줄과 함께 톡방에 올려주세요.</p>
+<p class="eyebrow">인증</p><h2 id="h4">인증 이미지 1장</h2>
+<p class="lead">아래 인증 이미지를 저장해서 미션방에 1장만 올려주시면 돼요.</p>
 <div class="card">
 <label class="mask"><input type="checkbox" data-f="mask" ${S.mask?'checked':''}> 금액은 "○억대"로 가려서 올릴게요</label>
 <p class="help" style="margin-top:4px">가려도 인증 인정이에요. 대신 계산은 꼭 내 진짜 숫자로 해주세요.</p>
-<div class="field" style="margin-top:18px"><label class="label" for="f-line">인증 한 줄 <small>고쳐 써도 돼요</small></label><textarea id="f-line" class="input" data-f="line" maxlength="200"></textarea>
-<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><button type="button" class="linkbtn" id="relines">자동 문장으로 되돌리기</button><button type="button" class="chip" id="copy">한 줄 복사</button></div></div>
 <div class="preview"><canvas id="cv" width="1080" height="1490" aria-label="대출 한도 인증 이미지 미리보기"></canvas><p>1080px 너비 PNG · 사진 앱에 저장하거나 톡방에 바로 올려요.</p></div>
 <div class="actions"><button type="button" class="btn primary" id="dl">인증 이미지 저장 ↓</button></div>
 <div class="saveimg" id="saveimgbox" hidden><img id="saveimg" alt="저장용 인증 이미지"><p>이미지를 길게 눌러 저장해 주세요</p></div>
